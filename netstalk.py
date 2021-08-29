@@ -28,7 +28,7 @@ def scan(addr, pl, modules:dict):
             try:
                 for module in modules.values():
                     if module.PORT == port:
-                        return module.process(pl, s, ip, port)
+                        return module._process(pl, s, ip)
             except KeyboardInterrupt:
                 raise
             except Exception as e:
@@ -39,6 +39,7 @@ def scan(addr, pl, modules:dict):
 def stalk(count=1000000, workers=None):
     modules = {}
     ports = set()
+
     for _, m, _ in iter_modules(['modules']):
         if m.startswith('_'):
             continue
