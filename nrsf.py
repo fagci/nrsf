@@ -9,7 +9,6 @@ from lib.processors import Processor
 
 # ports = (
 #     # 11, # systat (active users list)
-#     13, # time
 #     # 70, # gopher
 #     # 87, # talk (chat)
 #     119, # nntp (news)
@@ -48,8 +47,10 @@ def stalk(count, workers):
         c_name = ''.join(p[0].upper()+p[1:] for p in m.split('_'))
         module = modules[m] = getattr(getattr(__import__(f'modules.{m}'), m), c_name)(proc.print_lock)
         ports.add(module.PORT)
+        print(m, module.PORT)
 
-    print('ports:', ports)
+    print('Stalking...', end='\n\n')
+
 
     proc.process_each(scan, generate_addresses(count, ports), workers, modules)
 

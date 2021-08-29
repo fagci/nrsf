@@ -18,5 +18,5 @@ class Base:
         raise NotImplementedError
 
     def print(self, ip, res):
-        print(f'{ip}:{self.PORT}')
+        print(f'[{self.__class__.__name__}] {ip}:{self.PORT}')
         print(res, end='\n\n')
