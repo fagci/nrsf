@@ -4,6 +4,13 @@ Netrandom stalking framework
 
 ## Gathered samples
 
+Time
+
+```
+120.xx.171.xx:13
+5:12:38 2020/12/30
+```
+
 Quote of the day
 
 ```
