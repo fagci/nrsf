@@ -9,7 +9,6 @@ from lib.processors import Processor
 
 # ports = (
 #     # 11, # systat (active users list)
-#     # 70, # gopher
 #     # 87, # talk (chat)
 #     119, # nntp (news)
 #     # 123, # ntp (time)
@@ -51,10 +50,10 @@ def stalk(count, workers):
 
     print('Stalking...', end='\n\n')
 
-
     proc.process_each(scan, generate_addresses(count, ports), workers, modules)
 
 
 if __name__ == '__main__':
     setdefaulttimeout(1)
     stalk(1000000, 1024)
+
