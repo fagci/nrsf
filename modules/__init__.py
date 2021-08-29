@@ -1,9 +1,12 @@
 class Base:
     PORT = 0
 
-    def _process(self, pl, s, ip):
+    def __init__(self, print_lock):
+        self.print_lock = print_lock
+
+    def _process(self, s, ip):
         res = self.process(s, ip)
-        with pl:
+        with self.print_lock:
             self.print(ip, res)
     
     def process(self, s, ip):

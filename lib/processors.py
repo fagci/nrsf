@@ -1,15 +1,24 @@
-def process_each(fn, it, workers=16, *args):
-    running = True
+from threading import Lock, Thread
+from time import sleep
 
-    def fn2(gen, gl, pl, running, *args):
+class ProcessorThread(Thread):
+    def __init__(self, fn, gen, gl, pl, *args):
+        super().__init__(target=fn, daemon=True)
+        self.gen = iter(gen)
+        self.gl = gl
+        self.pl = pl
+        self.args = args
+
+    def run(self):
+        running = True
         while running:
             try:
-                with gl:
-                    item = next(gen)
+                with self.gl:
+                    item = next(self.gen)
             except StopIteration:
                 break
             try:
-                fn(item, pl, *args)
+                self._target(item, self.pl, *self.args)
             except StopIteration:
                 running = False
                 return
@@ -17,24 +26,22 @@ def process_each(fn, it, workers=16, *args):
                 running = False
                 raise
 
-    process(fn2, iter(it), workers, running, *args)
+class Processor:
+    def __init__(self):
+        self.threads = []
+        self.gen_lock = Lock()
+        self.print_lock = Lock()
 
+    def process_each(self, fn, it, workers=16, *args):
+        for _ in range(workers):
+            t = ProcessorThread(fn, it, self.gen_lock, self.print_lock, *args)
+            self.threads.append(t)
 
-def process(fn, it, workers=16, *args):
-    from threading import Lock, Thread
-    from time import sleep
+        for t in self.threads:
+            t.start()
 
-    threads = []
-    gen_lock = Lock()
-    print_lock = Lock()
-
-    for _ in range(workers):
-        t = Thread(target=fn, daemon=True, args=(
-            it, gen_lock, print_lock, *args))
-        threads.append(t)
-
-    for t in threads:
-        t.start()
-
-    while any(map(lambda t: t.is_alive(), threads)):
-        sleep(0.5)
+        try:
+            while any(map(lambda t: t.is_alive(), self.threads)):
+                sleep(0.5)
+        except KeyboardInterrupt:
+            print('Interrupted')

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 from pkgutil import iter_modules
-from socket import setdefaulttimeout, socket
+from socket import setdefaulttimeout, socket, timeout
 
 from lib.generators import generate_addresses
-from lib.processors import process_each
+from lib.processors import Processor
 
 
 # ports = (
@@ -20,7 +20,7 @@ from lib.processors import process_each
 # )
 
 
-def scan(addr, pl, modules:dict):
+def scan(addr, _, modules):
     with socket() as s:
         r = s.connect_ex(addr)
         if r == 0:
@@ -28,31 +28,35 @@ def scan(addr, pl, modules:dict):
             try:
                 for module in modules.values():
                     if module.PORT == port:
-                        return module._process(pl, s, ip)
+                        return module._process(s, ip)
             except KeyboardInterrupt:
                 raise
-            except Exception as e:
-                # print(e)
+            except (ConnectionError, timeout):
                 pass
+            except Exception as e:
+                print(e)
+                raise
 
 
-def stalk(count=1000000, workers=None):
+def stalk(count, workers):
     modules = {}
     ports = set()
+
+    proc = Processor()
 
     for _, m, _ in iter_modules(['modules']):
         if m.startswith('_'):
             continue
         c_name = ''.join(p[0].upper()+p[1:] for p in m.split('_'))
-        module = modules[m] = getattr(getattr(__import__(f'modules.{m}'), m), c_name)()
+        module = modules[m] = getattr(getattr(__import__(f'modules.{m}'), m), c_name)(proc.print_lock)
         ports.add(module.PORT)
 
     print('ports:', ports)
 
 
-    process_each(scan, generate_addresses(count, ports), workers, modules)
+    proc.process_each(scan, generate_addresses(count, ports), workers, modules)
 
 
 if __name__ == '__main__':
     setdefaulttimeout(1)
-    stalk(workers=1024)
+    stalk(1000000, 1024)
