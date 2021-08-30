@@ -3,7 +3,7 @@
 from argparse import ArgumentParser
 from pathlib import Path
 from pkgutil import iter_modules
-from socket import SOL_SOCKET, SO_LINGER, SO_REUSEADDR, setdefaulttimeout, socket
+from socket import SOL_SOCKET, SO_BINDTODEVICE, SO_LINGER, SO_REUSEADDR, setdefaulttimeout, socket
 from struct import pack
 import sys
 
@@ -14,13 +14,15 @@ OUTPUT_PATH = Path(__file__).resolve().parent / 'out'
 
 LINGER = pack('ii', 1, 0)
 
-def scan(ip_address, _, handlers):
+def scan(ip_address, _, handlers, iface):
     for handler_class in handlers:
         ip = str(ip_address)
 
         s = socket()
         s.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         s.setsockopt(SOL_SOCKET, SO_LINGER, LINGER)
+        if iface:
+            s.setsockopt(SOL_SOCKET, SO_BINDTODEVICE, iface.encode())
 
         handler = None
         
@@ -35,7 +37,7 @@ def scan(ip_address, _, handlers):
             handler.post()
 
 
-def stalk(limit, workers, modules_to_load, debug=False):
+def stalk(limit, workers, modules_to_load, debug=False, iface=''):
     handlers = []
 
     proc = Processor()
@@ -61,7 +63,7 @@ def stalk(limit, workers, modules_to_load, debug=False):
 
     print('Stalking...', end='\n\n')
 
-    proc.process_each(scan, generate_ips(limit), workers, handlers)
+    proc.process_each(scan, generate_ips(limit), workers, handlers, iface)
 
 
 if __name__ == '__main__':
@@ -71,7 +73,8 @@ if __name__ == '__main__':
     parser.add_argument('--limit', type=int, default=1000000)
     parser.add_argument('--workers', type=int, default=512)
     parser.add_argument('--debug', type=bool, default=False)
+    parser.add_argument('--iface', type=str, default='')
     args = parser.parse_args()
     setdefaulttimeout(args.timeout)
-    stalk(args.limit, args.workers, args.modules, args.debug)
+    stalk(args.limit, args.workers, args.modules, args.debug, args.iface)
 
