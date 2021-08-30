@@ -1,24 +1,26 @@
 #!/usr/bin/env python3
 
 from pkgutil import iter_modules
-from socket import setdefaulttimeout, socket
+from socket import setdefaulttimeout, socket, SOL_SOCKET, SO_LINGER
+from struct import pack
+from time import sleep
 
-from lib.generators import generate_addresses
+from lib.generators import generate_ips
 from lib.processors import Processor
 
+LINGER = pack('ii', 1, 0)
 
-def scan(addr, _, modules):
-    ip, port = addr
-    with socket() as s:
-        if s.connect_ex(addr) == 0:
-            for module in modules:
-                if module.PORT == port:
-                    return module.handle(s)
+def scan(ip_address, _, handlers):
+    for handler in handlers:
+        with socket() as s:
+            s.setsockopt(SOL_SOCKET, SO_LINGER, LINGER)
+            if s.connect_ex((str(ip_address), handler.PORT)) == 0:
+                handler.handle(s)
+        sleep(1)
 
 
 def stalk(count, workers):
-    modules = []
-    ports = set()
+    handlers = []
 
     proc = Processor()
 
@@ -26,14 +28,14 @@ def stalk(count, workers):
         if m.startswith('_'):
             continue
         c_name = ''.join(p[0].upper()+p[1:] for p in m.split('_'))
-        module = getattr(getattr(__import__(f'modules.{m}'), m), c_name)(proc.print_lock)
-        modules.append(module)
-        ports.add(module.PORT)
-        print(m, module.PORT)
+        module = getattr(__import__(f'modules.{m}'), m)
+        handler = getattr(module, c_name)(proc.print_lock)
+        handlers.append(handler)
+        print(m, handler.PORT)
 
     print('Stalking...', end='\n\n')
 
-    proc.process_each(scan, generate_addresses(count, ports), workers, modules)
+    proc.process_each(scan, generate_ips(count), workers, handlers)
 
 
 if __name__ == '__main__':
