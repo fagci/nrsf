@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from argparse import ArgumentParser
 from pkgutil import iter_modules
 from random import random
 from socket import SOL_SOCKET, SO_LINGER, SO_REUSEADDR, setdefaulttimeout, socket
@@ -22,13 +23,13 @@ def scan(ip_address, _, handlers):
         sleep(1 + random()/2)
 
 
-def stalk(count, workers):
+def stalk(limit, workers, modules_to_load=[]):
     handlers = []
 
     proc = Processor()
 
     for _, m, _ in iter_modules(['handlers']):
-        if m.startswith('_'):
+        if m.startswith('_') or (modules_to_load and m.lower() not in modules_to_load):
             continue
         c_name = ''.join(p[0].upper()+p[1:] for p in m.split('_'))
         module = getattr(__import__(f'handlers.{m}'), m)
@@ -45,10 +46,16 @@ def stalk(count, workers):
 
     print('Stalking...', end='\n\n')
 
-    proc.process_each(scan, generate_ips(count), workers, handlers)
+    proc.process_each(scan, generate_ips(limit), workers, handlers)
 
 
 if __name__ == '__main__':
-    setdefaulttimeout(0.75)
-    stalk(1000000, 512)
+    parser = ArgumentParser(description='Netrandom stalking framework')
+    parser.add_argument('--timeout', type=float, default=0.75)
+    parser.add_argument('--limit', type=int, default=1000000)
+    parser.add_argument('--workers', type=int, default=512)
+    parser.add_argument('modules', type=str, nargs='*', default=[])
+    args = parser.parse_args()
+    setdefaulttimeout(args.timeout)
+    stalk(args.limit, args.workers, args.modules)
 
