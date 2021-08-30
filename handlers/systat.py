@@ -1,5 +1,5 @@
 """Systat"""
 from handlers import Base
 
-class Systat(Base):
+class Handler(Base):
     PORT = 11

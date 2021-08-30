@@ -1,7 +1,7 @@
 from handlers import Base
 from html.parser import HTMLParser
 
-class Http(Base):
+class Handler(Base):
     PORT = 80
     def process(self, s):
         ip, _ = s.getpeername()

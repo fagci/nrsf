@@ -33,9 +33,8 @@ def stalk(limit, workers, modules_to_load, debug=False):
     for _, m, _ in iter_modules(['handlers']):
         if m.startswith('_') or (m.lower() not in modules_to_load):
             continue
-        c_name = ''.join(p[0].upper()+p[1:] for p in m.split('_'))
         module = getattr(__import__(f'handlers.{m}'), m)
-        handler = getattr(module, c_name)(proc.print_lock, debug)
+        handler = getattr(module, 'Handler')(proc.print_lock, debug)
         handlers.append(handler)
 
     if handlers:

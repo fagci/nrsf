@@ -1,5 +1,5 @@
 """News"""
 from handlers import Base
 
-class Nntp(Base):
+class Handler(Base):
     PORT = 119

@@ -1,5 +1,5 @@
 """Quote of the day"""
 from handlers import Base
 
-class Qotd(Base):
+class Handler(Base):
     PORT = 17

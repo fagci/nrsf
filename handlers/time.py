@@ -1,5 +1,5 @@
 """Time"""
 from handlers import Base
 
-class Time(Base):
+class Handler(Base):
     PORT = 13

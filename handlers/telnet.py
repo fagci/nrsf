@@ -1,4 +1,4 @@
 from handlers import Base
 
-class Telnet(Base):
+class Handler(Base):
     PORT = 23
