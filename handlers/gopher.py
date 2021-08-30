@@ -1,5 +1,5 @@
 """Gopher"""
-from modules import Base
+from handlers import Base
 
 class Gopher(Base):
     PORT = 70

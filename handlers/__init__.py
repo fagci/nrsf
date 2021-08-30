@@ -1,4 +1,6 @@
 from socket import timeout as SocketTimeoutError
+import sys
+
 class Base:
     PORT = 0
     TRIM = True
@@ -20,13 +22,17 @@ class Base:
             raise
         except (ConnectionError, SocketTimeoutError) as e:
             if self.DEBUG:
-                print(f'[self.__class__.__name__]',repr(e))
+                print(f'[self.__class__.__name__]', repr(e))
         except Exception as e:
             print(e)
             raise
     
     def process(self, s):
-        raise NotImplementedError
+        if self.DEBUG:
+            with self.print_lock:
+                print(f'[i {self.__class__.__name__}] Default handle strategy', file=sys.stderr)
+        return s.recv(1024).decode(errors='ignore')
+
 
     def print(self, ip, res):
         print(f'[{self.__class__.__name__}] {ip}:{self.PORT}')

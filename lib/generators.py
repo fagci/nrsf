@@ -8,9 +8,3 @@ def generate_ips(count=1000000):
             count -= 1
             yield ip
             continue
-
-
-def generate_addresses(ip_count=1000000, ports=80):
-    for ip in generate_ips(ip_count):
-        for port in ports:
-            yield (str(ip), port)

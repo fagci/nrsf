@@ -1,5 +1,5 @@
 """Finger"""
-from modules import Base
+from handlers import Base
 
 class Finger(Base):
     PORT = 79

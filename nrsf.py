@@ -4,6 +4,7 @@ from pkgutil import iter_modules
 from random import random
 from socket import SOL_SOCKET, SO_LINGER, SO_REUSEADDR, setdefaulttimeout, socket
 from struct import pack
+import sys
 from time import sleep
 
 from lib.generators import generate_ips
@@ -26,14 +27,21 @@ def stalk(count, workers):
 
     proc = Processor()
 
-    for _, m, _ in iter_modules(['modules']):
+    for _, m, _ in iter_modules(['handlers']):
         if m.startswith('_'):
             continue
         c_name = ''.join(p[0].upper()+p[1:] for p in m.split('_'))
-        module = getattr(__import__(f'modules.{m}'), m)
+        module = getattr(__import__(f'handlers.{m}'), m)
         handler = getattr(module, c_name)(proc.print_lock)
         handlers.append(handler)
-        print(m, handler.PORT)
+
+    if handlers:
+        print('Loaded handlers:')
+        for h in handlers:
+            print('-', h.__class__.__name__, f'({h.PORT} port)')
+    else:
+        print('No handlers loaded, exiting.')
+        sys.exit()
 
     print('Stalking...', end='\n\n')
 
