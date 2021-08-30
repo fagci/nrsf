@@ -53,6 +53,14 @@ Time
 Monday, August 30, 2021 04:49:03-MET-DST
 ```
 
+Telnet
+
+```
+[Telnet(default strategy)] 151.xxx.xxx.2:23
+This is an unrestricted telnet server.
+Please do not user for production purposes
+```
+
 HTTP
 
 ```

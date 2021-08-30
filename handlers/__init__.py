@@ -14,12 +14,13 @@ class Base:
 
     def handle(self, s):
         try:
+            addr = s.getpeername()
             res = self.process(s)
             if self.TRIM:
                 res = res.strip()
             if res or self.SHOW_EMPTY:
                 with self.print_lock:
-                    self.print(s.getpeername(), res)
+                    self.print(addr, res)
         except KeyboardInterrupt:
             raise
         except (ConnectionError, SocketTimeoutError) as e:
