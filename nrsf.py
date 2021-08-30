@@ -25,13 +25,13 @@ def scan(ip_address, _, handlers):
             sleep(1 + random()/2)
 
 
-def stalk(limit, workers, modules_to_load=[], debug=False):
+def stalk(limit, workers, modules_to_load, debug=False):
     handlers = []
 
     proc = Processor()
 
     for _, m, _ in iter_modules(['handlers']):
-        if m.startswith('_') or (modules_to_load and m.lower() not in modules_to_load):
+        if m.startswith('_') or (m.lower() not in modules_to_load):
             continue
         c_name = ''.join(p[0].upper()+p[1:] for p in m.split('_'))
         module = getattr(__import__(f'handlers.{m}'), m)
@@ -53,7 +53,7 @@ def stalk(limit, workers, modules_to_load=[], debug=False):
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Netrandom stalking framework')
-    parser.add_argument('modules', type=str, nargs='*', default=[])
+    parser.add_argument('modules', type=str, nargs='+', default=[])
     parser.add_argument('--timeout', type=float, default=0.75)
     parser.add_argument('--limit', type=int, default=1000000)
     parser.add_argument('--workers', type=int, default=512)

@@ -33,3 +33,21 @@ Quote of the day
 "We want a few mad people now. See where the sane ones have landed us!"
  George Bernard Shaw (1856-1950)
 ```
+
+## Usage
+
+```
+nrsf.py [-h] [--timeout TIMEOUT] [--limit LIMIT] [--workers WORKERS] [--debug DEBUG] modules [modules ...]
+
+Netrandom stalking framework
+
+positional arguments:
+  modules
+
+optional arguments:
+  -h, --help         show this help message and exit
+  --timeout TIMEOUT
+  --limit LIMIT
+  --workers WORKERS
+  --debug DEBUG
+```
