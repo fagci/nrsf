@@ -20,6 +20,22 @@ optional arguments:
 
 ## Gathered samples
 
+FTP
+
+```
+[ftp] 172.xxx.110.xxx:21
+{'DJI_0020.JPG'}
+
+[ftp] 216.xxx.203.xxx:21
+{'5d8a2dcd3a09d2fa75e104fd16b69d5e_preview_featured.jpg', '08d756bd00fcc8d65201a7bf545ca9d6_preview_featured.jpg'}
+
+[ftp] 76.xxx.184.xxx:21
+{'kraftwerk-greatest hits.jpg'}
+
+[ftp] 185.xxx.150.xxx:21
+{'Penguins.jpg'}
+```
+
 Quote of the day
 
 ```
