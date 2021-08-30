@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from argparse import ArgumentParser
+from pathlib import Path
 from pkgutil import iter_modules
 from socket import SOL_SOCKET, SO_LINGER, SO_REUSEADDR, setdefaulttimeout, socket
 from struct import pack
@@ -8,6 +9,8 @@ import sys
 
 from lib.generators import generate_ips
 from lib.processors import Processor
+
+OUTPUT_PATH = Path(__file__).resolve().parent / 'out'
 
 LINGER = pack('ii', 1, 0)
 
@@ -43,6 +46,7 @@ def stalk(limit, workers, modules_to_load, debug=False):
         module = getattr(__import__(f'handlers.{m}'), m)
         handler = getattr(module, 'Handler')
         handler.set_print_lock(proc.print_lock)
+        handler.set_output_path(OUTPUT_PATH)
         if debug:
             handler.DEBUG = True
         handlers.append(handler)

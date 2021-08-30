@@ -110,4 +110,4 @@ class Handler(Base):
             sleep(1)
 
         if self.files:
-            self.print(self.files)
+            self.print(' '.join(self.files))

@@ -1,5 +1,5 @@
+from pathlib import Path
 from socket import timeout as SocketTimeoutError
-import sys
 from threading import Lock
 
 class Base:
@@ -8,6 +8,7 @@ class Base:
     SHOW_EMPTY = False
     DEBUG = False
     __print_lock: Lock
+    __out_path: Path
 
     def __init__(self, socket, ip):
         self.socket = socket
@@ -46,11 +47,23 @@ class Base:
 
     def print(self, res):
         is_default = False
+        module_name = self.__class__.__module__.split(".")[-1]
         if self.process.__doc__ == 'NotImplemented':
             is_default = True
-        print(f'[{self.__class__.__module__.split(".")[-1]}{"(default strategy)" if is_default else ""}] {self.ip}:{self.PORT}')
+        print(f'[{module_name}{"(default strategy)" if is_default else ""}] {self.ip}:{self.PORT}')
         print(res, end='\n\n')
+
+        out_dir = self.__out_path / module_name
+        out_dir.mkdir(exist_ok=True)
+        
+        with (out_dir / 'things.txt').open('a') as f:
+            f.write(f'{self.ip}:{self.PORT}\n{res}\n\n')
+
 
     @staticmethod
     def set_print_lock(lock):
         Base.__print_lock = lock
+
+    @staticmethod
+    def set_output_path(path):
+        Base.__out_path = path
