@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from pkgutil import iter_modules
-from socket import setdefaulttimeout, socket, timeout
+from socket import setdefaulttimeout, socket
 
 from lib.generators import generate_addresses
 from lib.processors import Processor
@@ -21,17 +21,16 @@ def scan(addr, _, modules):
         r = s.connect_ex(addr)
         if r == 0:
             ip, port = addr
-            try:
-                for module in modules.values():
-                    if module.PORT == port:
+            for module in modules.values():
+                if module.PORT == port:
+                    try:
                         return module._process(s, ip)
-            except KeyboardInterrupt:
-                raise
-            except (ConnectionError, timeout):
-                pass
-            except Exception as e:
-                print(e)
-                raise
+                    except KeyboardInterrupt:
+                        raise
+                    except Exception as e:
+                        print(e)
+                        raise
+            s.close()
 
 
 def stalk(count, workers):

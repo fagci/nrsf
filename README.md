@@ -1,6 +1,4 @@
-# nrsf
-
-Netrandom stalking framework
+# Netrandom stalking framework (nrsf)
 
 ## Gathered samples
 
