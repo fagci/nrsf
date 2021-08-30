@@ -34,9 +34,9 @@ class Base:
         return s.recv(1024).decode(errors='ignore')
 
 
-    def print(self, ip, res):
-        if self.DEBUG and self.process.__doc__ == 'NotImplemented':
-            with self.print_lock:
-                print(f'[i {self.__class__.__name__}] Default handle strategy', file=sys.stderr)
-        print(f'[{self.__class__.__name__}] {ip}:{self.PORT}')
+    def print(self, addr, res):
+        is_default = False
+        if self.process.__doc__ == 'NotImplemented':
+            is_default = True
+        print(f'[{self.__class__.__name__}{"(default strategy)" if is_default else ""}] {addr[0]}:{addr[1]}')
         print(res, end='\n\n')
