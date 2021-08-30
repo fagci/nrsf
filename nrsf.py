@@ -3,7 +3,14 @@
 from argparse import ArgumentParser
 from pkgutil import iter_modules
 from random import random
-from socket import SOL_SOCKET, SO_LINGER, SO_REUSEADDR, setdefaulttimeout, socket
+from socket import (
+    SHUT_RDWR,
+    SOL_SOCKET,
+    SO_LINGER,
+    SO_REUSEADDR,
+    setdefaulttimeout,
+    socket,
+)
 from struct import pack
 import sys
 from time import sleep
@@ -14,13 +21,23 @@ from lib.processors import Processor
 LINGER = pack('ii', 1, 0)
 
 def scan(ip_address, _, handlers):
-    for handler in handlers:
-        with socket() as s:
-            s.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-            s.setsockopt(SOL_SOCKET, SO_LINGER, LINGER)
-            ip = str(ip_address)
-            if s.connect_ex((ip, handler.PORT)) == 0:
-                handler(s, ip).handle()
+    for handler_class in handlers:
+        ip = str(ip_address)
+
+        s = socket()
+        s.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+        s.setsockopt(SOL_SOCKET, SO_LINGER, LINGER)
+
+        handler = None
+        
+        if s.connect_ex((ip, handler_class.PORT)) == 0:
+            handler = handler_class(s, ip)
+            handler.handle()
+            s.close()
+
+        if handler:
+            handler.post()
+
         if len(handlers) > 1:
             sleep(1 + random()/2)
 
@@ -35,7 +52,7 @@ def stalk(limit, workers, modules_to_load, debug=False):
             continue
         module = getattr(__import__(f'handlers.{m}'), m)
         handler = getattr(module, 'Handler')
-        handler.print_lock = proc.print_lock
+        handler.set_print_lock(proc.print_lock)
         if debug:
             handler.DEBUG = True
         handlers.append(handler)

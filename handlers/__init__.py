@@ -7,7 +7,7 @@ class Base:
     TRIM = True
     SHOW_EMPTY = False
     DEBUG = False
-    print_lock: Lock
+    __print_lock: Lock
 
     def __init__(self, socket, ip):
         self.socket = socket
@@ -15,13 +15,12 @@ class Base:
 
     def handle(self):
         try:
-            addr = self.socket.getpeername()
             res = self.process()
             if self.TRIM and res:
                 res = res.strip()
             if res or self.SHOW_EMPTY:
-                with self.print_lock:
-                    self.print(addr, res)
+                with self.__print_lock:
+                    self.print(res)
         except KeyboardInterrupt:
             raise
         except (ConnectionError, SocketTimeoutError) as e:
@@ -30,6 +29,9 @@ class Base:
         except Exception as e:
             print(e)
             raise
+
+    def post(self):
+        pass
 
     def read(self, count = 1024):
         return self.socket.recv(count).decode(errors='ignore')
@@ -42,9 +44,13 @@ class Base:
         return self.read()
 
 
-    def print(self, addr, res):
+    def print(self, res):
         is_default = False
         if self.process.__doc__ == 'NotImplemented':
             is_default = True
-        print(f'[{self.__class__.__module__.split(".")[-1]}{"(default strategy)" if is_default else ""}] {addr[0]}:{addr[1]}')
+        print(f'[{self.__class__.__module__.split(".")[-1]}{"(default strategy)" if is_default else ""}] {self.ip}:{self.PORT}')
         print(res, end='\n\n')
+
+    @staticmethod
+    def set_print_lock(lock):
+        Base.__print_lock = lock
