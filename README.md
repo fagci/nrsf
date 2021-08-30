@@ -1,4 +1,5 @@
 # Netrandom stalking framework (nrsf)
+<img src="logo.png" align="right"></img>
 
 ## Usage
 
