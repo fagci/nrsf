@@ -18,9 +18,9 @@ def scan(ip_address, _, handlers):
         with socket() as s:
             s.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
             s.setsockopt(SOL_SOCKET, SO_LINGER, LINGER)
-            addr = (str(ip_address), handler.PORT)
-            if s.connect_ex(addr) == 0:
-                handler(s, ip_address).handle()
+            ip = str(ip_address)
+            if s.connect_ex((ip, handler.PORT)) == 0:
+                handler(s, ip).handle()
         if len(handlers) > 1:
             sleep(1 + random()/2)
 
