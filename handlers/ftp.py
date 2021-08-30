@@ -9,7 +9,7 @@ class Handler(Base):
     PORT = 21
 
     def process(self):
-        pass
+        self.files = set()
 
     def traverse(self, ftp: FTP, depth=0, files=None):
         if files is None:
@@ -27,7 +27,7 @@ class Handler(Base):
 
             try:
                 if path.lower().endswith(INTERESTING_EXTENSIONS):
-                    self.print(path)
+                    self.files.add(path)
                     return path
 
                 # skip files by extension delimiter
@@ -108,3 +108,6 @@ class Handler(Base):
                 break
             retries -= 1
             sleep(1)
+
+        if self.files:
+            self.print(self.files)
