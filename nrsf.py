@@ -54,6 +54,6 @@ def stalk(count, workers):
 
 
 if __name__ == '__main__':
-    setdefaulttimeout(1)
+    setdefaulttimeout(0.75)
     stalk(1000000, 1024)
 
