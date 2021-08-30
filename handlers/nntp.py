@@ -1,4 +1,3 @@
-"""News"""
 from handlers import Base
 
 class Handler(Base):

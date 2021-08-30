@@ -3,10 +3,9 @@ from html.parser import HTMLParser
 
 class Handler(Base):
     PORT = 80
-    def process(self, s):
-        ip, _ = s.getpeername()
-        s.send(f'GET / HTTP/1.1\r\nHost: {ip}\r\n\r\n'.encode())
-        html = s.recv(1024).decode(errors='ignore')
+    def process(self):
+        self.write(f'GET / HTTP/1.1\r\nHost: {self.ip}\r\n\r\n'.encode())
+        html = self.read(4096)
         title_parser = TitleParser()
         title_parser.feed(html)
         return title_parser.title.replace('\n', ' ').replace('\r', '')

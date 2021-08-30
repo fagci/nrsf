@@ -1,4 +1,3 @@
-"""Time"""
 from handlers import Base
 
 class Handler(Base):

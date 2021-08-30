@@ -1,21 +1,22 @@
 from socket import timeout as SocketTimeoutError
 import sys
+from threading import Lock
 
 class Base:
     PORT = 0
     TRIM = True
     SHOW_EMPTY = False
     DEBUG = False
+    print_lock: Lock
 
-    def __init__(self, print_lock, force_debug=False):
-        self.print_lock = print_lock
-        if force_debug:
-            self.DEBUG = True
+    def __init__(self, socket, ip):
+        self.socket = socket
+        self.ip = ip
 
-    def handle(self, s):
+    def handle(self):
         try:
-            addr = s.getpeername()
-            res = self.process(s)
+            addr = self.socket.getpeername()
+            res = self.process()
             if self.TRIM and res:
                 res = res.strip()
             if res or self.SHOW_EMPTY:
@@ -29,10 +30,16 @@ class Base:
         except Exception as e:
             print(e)
             raise
+
+    def read(self, count = 1024):
+        return self.socket.recv(count).decode(errors='ignore')
+
+    def write(self, text):
+        self.socket.send(text)
     
-    def process(self, s):
+    def process(self):
         """NotImplemented"""
-        return s.recv(1024).decode(errors='ignore')
+        return self.read()
 
 
     def print(self, addr, res):

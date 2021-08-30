@@ -20,7 +20,7 @@ def scan(ip_address, _, handlers):
             s.setsockopt(SOL_SOCKET, SO_LINGER, LINGER)
             addr = (str(ip_address), handler.PORT)
             if s.connect_ex(addr) == 0:
-                handler.handle(s)
+                handler(s, ip_address).handle()
         if len(handlers) > 1:
             sleep(1 + random()/2)
 
@@ -34,7 +34,10 @@ def stalk(limit, workers, modules_to_load, debug=False):
         if m.startswith('_') or (m.lower() not in modules_to_load):
             continue
         module = getattr(__import__(f'handlers.{m}'), m)
-        handler = getattr(module, 'Handler')(proc.print_lock, debug)
+        handler = getattr(module, 'Handler')
+        handler.print_lock = proc.print_lock
+        if debug:
+            handler.DEBUG = True
         handlers.append(handler)
 
     if handlers:
