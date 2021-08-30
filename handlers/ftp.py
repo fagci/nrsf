@@ -32,7 +32,7 @@ class Handler(Base):
 
                 # skip files by extension delimiter
                 if '.' in path:
-                    print('-', path)
+                    # print('-', path)
                     continue
 
                 ftp.cwd(path)
@@ -90,7 +90,7 @@ class Handler(Base):
                 if code == 421:
                     break
                 if code == 450:
-                    print('-', self.ip, e)
+                    # print('-', self.ip, e)
                     break
                 if code == 431:
                     if Connector is FTP:
@@ -98,13 +98,12 @@ class Handler(Base):
                         continue
                     else:
                         break
-                print(repr(e))
+                # print(repr(e))
                 break
             except OSError as e:
                 pass
             except KeyboardInterrupt:
-                print('Interrupted by user.')
-                exit(130)
+                raise
             except Exception:
                 break
             retries -= 1
