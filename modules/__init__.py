@@ -8,19 +8,24 @@ class Base:
     def __init__(self, print_lock):
         self.print_lock = print_lock
 
-    def _process(self, s, ip):
+    def handle(self, s):
         try:
-            res = self.process(s, ip)
+            res = self.process(s)
             if self.TRIM:
                 res = res.strip()
             if res or self.SHOW_EMPTY:
                 with self.print_lock:
-                    self.print(ip, res)
+                    self.print(s.getpeername(), res)
+        except KeyboardInterrupt:
+            raise
         except (ConnectionError, SocketTimeoutError) as e:
             if self.DEBUG:
                 print(f'[self.__class__.__name__]',repr(e))
+        except Exception as e:
+            print(e)
+            raise
     
-    def process(self, s, ip):
+    def process(self, s):
         raise NotImplementedError
 
     def print(self, ip, res):

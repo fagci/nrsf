@@ -7,34 +7,17 @@ from lib.generators import generate_addresses
 from lib.processors import Processor
 
 
-# ports = (
-#     # 11, # systat (active users list)
-#     # 87, # talk (chat)
-#     119, # nntp (news)
-#     # 123, # ntp (time)
-#     # 113, # statistics
-# )
-
-
 def scan(addr, _, modules):
+    ip, port = addr
     with socket() as s:
-        r = s.connect_ex(addr)
-        if r == 0:
-            ip, port = addr
-            for module in modules.values():
+        if s.connect_ex(addr) == 0:
+            for module in modules:
                 if module.PORT == port:
-                    try:
-                        return module._process(s, ip)
-                    except KeyboardInterrupt:
-                        raise
-                    except Exception as e:
-                        print(e)
-                        raise
-            s.close()
+                    return module.handle(s)
 
 
 def stalk(count, workers):
-    modules = {}
+    modules = []
     ports = set()
 
     proc = Processor()
@@ -43,7 +26,8 @@ def stalk(count, workers):
         if m.startswith('_'):
             continue
         c_name = ''.join(p[0].upper()+p[1:] for p in m.split('_'))
-        module = modules[m] = getattr(getattr(__import__(f'modules.{m}'), m), c_name)(proc.print_lock)
+        module = getattr(getattr(__import__(f'modules.{m}'), m), c_name)(proc.print_lock)
+        modules.append(module)
         ports.add(module.PORT)
         print(m, module.PORT)
 
@@ -54,5 +38,5 @@ def stalk(count, workers):
 
 if __name__ == '__main__':
     setdefaulttimeout(0.75)
-    stalk(1000000, 1024)
+    stalk(1000000, 512)
 
