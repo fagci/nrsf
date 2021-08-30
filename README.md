@@ -1,4 +1,6 @@
 # Netrandom stalking framework (nrsf)
+
+Netwotk research & automated information gathering framework. Without dependencies.
 <img src="logo.png" align="right"></img>
 
 ## Usage
