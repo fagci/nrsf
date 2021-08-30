@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from pkgutil import iter_modules
+from random import random
 from socket import setdefaulttimeout, socket, SOL_SOCKET, SO_LINGER
 from struct import pack
 from time import sleep
@@ -16,7 +17,7 @@ def scan(ip_address, _, handlers):
             s.setsockopt(SOL_SOCKET, SO_LINGER, LINGER)
             if s.connect_ex((str(ip_address), handler.PORT)) == 0:
                 handler.handle(s)
-        sleep(1)
+        sleep(1 + random()/2)
 
 
 def stalk(count, workers):
