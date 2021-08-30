@@ -55,7 +55,7 @@ def stalk(limit, workers, modules_to_load, debug=False):
     if handlers:
         print('Loaded handlers:')
         for h in handlers:
-            print('-', h.__class__.__name__, f'({h.PORT} port)')
+            print('-', h.__module__.split('.')[-1], f'({h.PORT} port)')
     else:
         print('No handlers loaded, exiting.')
         sys.exit()
