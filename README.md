@@ -24,14 +24,14 @@ Quote of the day
 ```
 
 ```
-[Qotd] 49.171.26.110:17
+[Qotd] 49.xxx.26.xxx:17
 "A wonderful fact to reflect upon, that every human creature is constituted
  to be that profound secret and mystery to every other."
  Charles Dickens (1812-70)
 ```
 
 ```
-[Qotd] 112.173.16.204:17
+[Qotd] 112.xxx.16.xxx:17
 "We want a few mad people now. See where the sane ones have landed us!"
  George Bernard Shaw (1856-1950)
 ```
