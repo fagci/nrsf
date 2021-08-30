@@ -3,14 +3,7 @@
 from argparse import ArgumentParser
 from pkgutil import iter_modules
 from random import random
-from socket import (
-    SHUT_RDWR,
-    SOL_SOCKET,
-    SO_LINGER,
-    SO_REUSEADDR,
-    setdefaulttimeout,
-    socket,
-)
+from socket import SOL_SOCKET, SO_LINGER, SO_REUSEADDR, setdefaulttimeout, socket
 from struct import pack
 import sys
 from time import sleep
@@ -30,7 +23,9 @@ def scan(ip_address, _, handlers):
 
         handler = None
         
-        if s.connect_ex((ip, handler_class.PORT)) == 0:
+        status = s.connect_ex((ip, handler_class.PORT))
+
+        if status == 0:
             handler = handler_class(s, ip)
             handler.handle()
             s.close()

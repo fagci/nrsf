@@ -16,7 +16,6 @@ class Handler(Base):
             files = []
 
         if depth > 10:
-            print(ftp.host, 'too deep, leave')
             return
 
         paths = [p for p in ftp.nlst() if p not in PATH_BLACKLIST]
@@ -24,7 +23,6 @@ class Handler(Base):
         for path in paths:
             files.append(path)
             if len(files) > 100:
-                print(ftp.host, 'too many files, leave')
                 return
 
             try:
@@ -38,7 +36,6 @@ class Handler(Base):
                     continue
 
                 ftp.cwd(path)
-                print(ftp.host, 'cd', path)
                 found = self.traverse(ftp, depth+1, files)
                 ftp.cwd('..')
 
@@ -50,11 +47,9 @@ class Handler(Base):
 
 
     def get_files(self, ftp: FTP):
-        ip = ftp.host
         lst = [p for p in ftp.nlst() if p not in ('.', '..')]
 
         if not lst:
-            print('-', ip, 'no files')
             return
 
         banner = ''
@@ -63,11 +58,7 @@ class Handler(Base):
         except:
             pass
 
-        print('Traverse', ip, 'start')
-        res = self.traverse(ftp)
-        print('Traverse', ip, 'end')
-
-        return res
+        return self.traverse(ftp)
 
 
     def post(self):
@@ -78,13 +69,12 @@ class Handler(Base):
             try:
                 with Connector(self.ip, timeout=30) as ftp:
                     ftp.login()
-                    print('~', self.ip)
                     try:
                         ftp.sendcmd('OPTS UTF8 ON')
                         ftp.encoding = 'utf-8'
                     except:
                         pass
-                    return self.get_files(ftp)
+                    self.get_files(ftp)
             except (error_perm, error_proto) as e:
                 if Connector is FTP:
                     Connector = FTP_TLS
