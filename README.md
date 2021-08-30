@@ -76,6 +76,17 @@ Monday, August 30, 2021 04:49:03-MET-DST
 Telnet
 
 ```
+[telnet(default strategy)] 80.xxx.xxx.xxx:23                                 
+#
+| LANCOM 1781AW                                                             
+| Ver. 8.62.0050RU2 / 07.08.2012
+| SN.  4002419818100978                                                     
+| Copyright (c) LANCOM Systems
+                                                                            
+m3iHerbersJB, Connection No.: 002 (WAN)
+```
+
+```
 [Telnet(default strategy)] 151.xxx.xxx.2:23
 This is an unrestricted telnet server.
 Please do not user for production purposes
