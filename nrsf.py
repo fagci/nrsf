@@ -2,7 +2,7 @@
 
 from pkgutil import iter_modules
 from random import random
-from socket import setdefaulttimeout, socket, SOL_SOCKET, SO_LINGER
+from socket import SOL_SOCKET, SO_LINGER, SO_REUSEADDR, setdefaulttimeout, socket
 from struct import pack
 from time import sleep
 
@@ -14,6 +14,7 @@ LINGER = pack('ii', 1, 0)
 def scan(ip_address, _, handlers):
     for handler in handlers:
         with socket() as s:
+            s.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
             s.setsockopt(SOL_SOCKET, SO_LINGER, LINGER)
             if s.connect_ex((str(ip_address), handler.PORT)) == 0:
                 handler.handle(s)
