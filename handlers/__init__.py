@@ -57,7 +57,8 @@ class Base:
         out_dir.mkdir(exist_ok=True)
         
         with (out_dir / 'things.txt').open('a') as f:
-            f.write(f'{self.ip}:{self.PORT}\n{res}\n\n')
+            res_f = str(res).replace("\n", "\\n").replace('\r', '')
+            f.write(f'{self.ip}:{self.PORT} {res_f}\n')
 
 
     @staticmethod
