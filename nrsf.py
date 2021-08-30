@@ -2,11 +2,9 @@
 
 from argparse import ArgumentParser
 from pkgutil import iter_modules
-from random import random
 from socket import SOL_SOCKET, SO_LINGER, SO_REUSEADDR, setdefaulttimeout, socket
 from struct import pack
 import sys
-from time import sleep
 
 from lib.generators import generate_ips
 from lib.processors import Processor
@@ -32,9 +30,6 @@ def scan(ip_address, _, handlers):
 
         if handler:
             handler.post()
-
-        if len(handlers) > 1:
-            sleep(1 + random()/2)
 
 
 def stalk(limit, workers, modules_to_load, debug=False):
