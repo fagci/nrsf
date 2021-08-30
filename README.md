@@ -61,4 +61,7 @@ Hello! Welcome to Synology Web Station!
 
 [Http] 74.xxx.xxx.xxx:80
 InMotion Hosting
+
+[Http] 20.56.xxx.xxx:80
+Your Azure Function App is up and running.
 ```
