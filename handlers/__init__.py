@@ -16,7 +16,7 @@ class Base:
         try:
             addr = s.getpeername()
             res = self.process(s)
-            if self.TRIM:
+            if self.TRIM and res:
                 res = res.strip()
             if res or self.SHOW_EMPTY:
                 with self.print_lock:
@@ -25,7 +25,7 @@ class Base:
             raise
         except (ConnectionError, SocketTimeoutError) as e:
             if self.DEBUG:
-                print(f'[{self.__class__.__name__}]', repr(e))
+                print(f'[{self.__class__.__module__.split(".")[-1]}]', repr(e))
         except Exception as e:
             print(e)
             raise
@@ -39,5 +39,5 @@ class Base:
         is_default = False
         if self.process.__doc__ == 'NotImplemented':
             is_default = True
-        print(f'[{self.__class__.__name__}{"(default strategy)" if is_default else ""}] {addr[0]}:{addr[1]}')
+        print(f'[{self.__class__.__module__.split(".")[-1]}{"(default strategy)" if is_default else ""}] {addr[0]}:{addr[1]}')
         print(res, end='\n\n')
