@@ -24,7 +24,6 @@ def scan(ip_address, _, handlers, iface):
         if iface:
             s.setsockopt(SOL_SOCKET, SO_BINDTODEVICE, iface.encode())
 
-        handler = None
         
         status = s.connect_ex((ip, handler_class.PORT))
 
@@ -32,8 +31,6 @@ def scan(ip_address, _, handlers, iface):
             handler = handler_class(s, ip)
             handler.handle()
             s.close()
-
-        if handler:
             handler.post()
 
 
@@ -68,13 +65,16 @@ def stalk(limit, workers, modules_to_load, debug=False, iface=''):
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Netrandom stalking framework')
+
     parser.add_argument('modules', type=str, nargs='+', default=[])
     parser.add_argument('--timeout', type=float, default=0.75)
     parser.add_argument('--limit', type=int, default=1000000)
     parser.add_argument('--workers', type=int, default=512)
     parser.add_argument('--debug', type=bool, default=False)
     parser.add_argument('--iface', type=str, default='')
+
     args = parser.parse_args()
+
     setdefaulttimeout(args.timeout)
     stalk(args.limit, args.workers, args.modules, args.debug, args.iface)
 

@@ -33,11 +33,14 @@ class Processor:
         self.print_lock = Lock()
 
     def process_each(self, fn, it, workers=16, *args):
+        threads = self.threads
+        add_thread = threads.append
+
         for _ in range(workers):
             t = ProcessorThread(fn, it, self.gen_lock, self.print_lock, *args)
-            self.threads.append(t)
+            add_thread(t)
 
-        for t in self.threads:
+        for t in threads:
             t.start()
 
         try:
