@@ -26,7 +26,7 @@ class Base:
             raise
         except (ConnectionError, SocketTimeoutError) as e:
             if self.DEBUG:
-                print(f'[{self.__class__.__module__.split(".")[-1]}]', repr(e))
+                print(f'[{self.name}]', repr(e))
         except Exception as e:
             print(e)
             raise
@@ -44,16 +44,20 @@ class Base:
         """NotImplemented"""
         return self.read()
 
+    @classmethod
+    @property
+    def name(cls):
+        return cls.__module__.split('.')[-1]
+
 
     def print(self, res):
         is_default = False
-        module_name = self.__class__.__module__.split(".")[-1]
         if self.process.__doc__ == 'NotImplemented':
             is_default = True
-        print(f'[{module_name}{"(default strategy)" if is_default else ""}] {self.ip}:{self.PORT}')
+        print(f'[{self.name}{"(default strategy)" if is_default else ""}] {self.ip}:{self.PORT}')
         print(res, end='\n\n')
 
-        out_dir = self.__out_path / module_name
+        out_dir = self.__out_path / self.name
         out_dir.mkdir(exist_ok=True)
         
         with (out_dir / 'things.txt').open('a') as f:
