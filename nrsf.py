@@ -12,25 +12,23 @@ from lib.processors import Processor
 OUTPUT_PATH = Path(__file__).resolve().parent / 'out'
 
 
-def scan(ip_address, _, handlers, iface):
+def scan(ip_address, _, handlers):
     for handler_class in handlers:
         ip = str(ip_address)
 
-        with handler_class(ip, iface) as handler:
+        with handler_class(ip) as handler:
             handler.handle()
 
-
-def stalk(limit, workers, modules_to_load, debug=False, iface=''):
+def bootstrap(modules_to_load, print_lock, iface, debug):
     handlers = []
-
-    proc = Processor()
 
     for _, m, _ in iter_modules(['handlers']):
         if m.startswith('_') or (m.lower() not in modules_to_load):
             continue
         module = getattr(__import__(f'handlers.{m}'), m)
         handler = getattr(module, 'Handler')
-        handler.set_print_lock(proc.print_lock)
+        handler.set_iface(iface)
+        handler.set_print_lock(print_lock)
         handler.set_output_path(OUTPUT_PATH)
         if debug:
             handler.DEBUG = True
@@ -44,9 +42,16 @@ def stalk(limit, workers, modules_to_load, debug=False, iface=''):
         print('No handlers loaded, exiting.')
         sys.exit()
 
+    return handlers
+
+
+def stalk(limit, workers, modules_to_load, debug=False, iface=''):
+    proc = Processor()
+    handlers = bootstrap(modules_to_load, proc.print_lock, iface, debug)
+
     print('Stalking...', end='\n\n')
 
-    proc.process_each(scan, generate_ips(limit), workers, handlers, iface)
+    proc.process_each(scan, generate_ips(limit), workers, handlers)
 
 
 if __name__ == '__main__':

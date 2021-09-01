@@ -25,14 +25,14 @@ class Base:
     SHOW_EMPTY = False
     DEBUG = False
 
-    __slots__ = ('__print_lock', '__out_path', 'port_status', 'socket', 'ip', 'address', 'iface')
+    __slots__ = ('__print_lock', '__out_path', 'port_status', 'socket', 'ip', 'address', '__iface')
 
     __print_lock: Lock
     __out_path: Path
+    __iface: bytes
 
-    def __init__(self, ip, iface=''):
+    def __init__(self, ip):
         self.socket = None
-        self.iface = iface
         self.ip = ip
         self.address = (ip, self.PORT)
         self.port_status = PortStatus.UNKNOWN
@@ -65,6 +65,10 @@ class Base:
     def pre_open(self):
         pass
 
+    def process(self):
+        """NotImplemented"""
+        return self.read()
+
     def post(self):
         """Make some things here after knowing that port is open
         ex.: connect to FTP without wrapping socket or reinvent client"""
@@ -81,8 +85,8 @@ class Base:
             try:
                 self.socket = create_connection(self.address)
                 setsockopt = self.socket.setsockopt
-                if self.iface:
-                    setsockopt(SOL_SOCKET, SO_BINDTODEVICE, self.iface.encode())
+                if self.__iface:
+                    setsockopt(SOL_SOCKET, SO_BINDTODEVICE, self.__iface)
                 setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
                 setsockopt(SOL_SOCKET, SO_LINGER, LINGER)
                 self.port_status = PortStatus.OPENED
@@ -107,26 +111,7 @@ class Base:
 
         is_interrupt = isinstance(exc_value, KeyboardInterrupt)
         return not is_interrupt
-
-    def read(self, count=1024):
-        return self.socket.recv(count).decode(errors='ignore')
-
-    def write(self, text):
-        self.socket.send(text)
-
-    def dialog(self, text, count=1024):
-        self.write(text)
-        return self.read(count)
     
-    def process(self):
-        """NotImplemented"""
-        return self.read()
-
-    @classmethod
-    def get_name(cls):
-        return cls.__module__.split('.')[-1]
-
-
     def print(self, res):
         is_default = False
         if self.process.__doc__ == 'NotImplemented':
@@ -141,6 +126,23 @@ class Base:
             res_f = str(res).replace("\n", "\\n").replace('\r', '')
             f.write(f'{self.ip}:{self.PORT} {res_f}\n')
 
+    def read(self, count=1024):
+        return self.socket.recv(count).decode(errors='ignore')
+
+    def write(self, text):
+        self.socket.send(text)
+
+    def dialog(self, text, count=1024):
+        self.write(text)
+        return self.read(count)
+
+    @classmethod
+    def get_name(cls):
+        return cls.__module__.split('.')[-1]
+
+    @staticmethod
+    def set_iface(iface):
+        Base.__iface = iface.encode()
 
     @staticmethod
     def set_print_lock(lock):
