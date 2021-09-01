@@ -49,8 +49,7 @@ class Base:
         return self.read()
 
     @classmethod
-    @property
-    def name(cls):
+    def get_name(cls):
         return cls.__module__.split('.')[-1]
 
 
@@ -58,10 +57,10 @@ class Base:
         is_default = False
         if self.process.__doc__ == 'NotImplemented':
             is_default = True
-        print(f'[{self.name}{"(default strategy)" if is_default else ""}] {self.ip}:{self.PORT}')
+        print(f'[{self.get_name()}{"(default strategy)" if is_default else ""}] {self.ip}:{self.PORT}')
         print(res, end='\n\n')
 
-        out_dir = self.__out_path / self.name
+        out_dir = self.__out_path / self.get_name()
         out_dir.mkdir(exist_ok=True)
         
         with (out_dir / 'things.txt').open('a') as f:
