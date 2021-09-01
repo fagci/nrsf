@@ -34,11 +34,15 @@ class Base:
     def post(self):
         pass
 
-    def read(self, count = 1024):
+    def read(self, count=1024):
         return self.socket.recv(count).decode(errors='ignore')
 
     def write(self, text):
         self.socket.send(text)
+
+    def dialog(self, text, count=1024):
+        self.write(text)
+        return self.read(count)
     
     def process(self):
         """NotImplemented"""

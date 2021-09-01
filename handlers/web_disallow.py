@@ -12,8 +12,7 @@ class Handler(Base):
             'User-Agent: Mozilla/5.0\r\n\r\n'
         )
         
-        self.write(robots_request.encode())
-        robots = self.read()
+        robots = self.dialog(robots_request.encode())
 
         if not self.DISALLOW_RE.findall(robots):
             return
