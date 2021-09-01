@@ -13,11 +13,13 @@ from time import sleep, time
 
 LINGER = pack('ii', 1, 0)
 
+
 class PortStatus:
     UNKNOWN = 0
     OPENED = 1
     CLOSED = 2
     FILTERED = 3
+
 
 class Base:
     PORT = 0
@@ -25,7 +27,8 @@ class Base:
     SHOW_EMPTY = False
     DEBUG = False
 
-    __slots__ = ('__print_lock', '__out_path', 'port_status', 'socket', 'ip', 'address', '__iface')
+    __slots__ = ('__print_lock', '__out_path', 'port_status', 'socket', 'ip',
+                 'address', '__iface')
 
     __print_lock: Lock
     __out_path: Path
@@ -99,11 +102,11 @@ class Base:
                 sleep(1)
 
         return self
-      
+
     def __exit__(self, exc_type, exc_value, exc_traceback):
         if self.socket:
             self.socket.close()
-        
+
         self.post()
 
         if self.socket:
@@ -111,17 +114,19 @@ class Base:
 
         is_interrupt = isinstance(exc_value, KeyboardInterrupt)
         return not is_interrupt
-    
+
     def print(self, res):
         is_default = False
         if self.process.__doc__ == 'NotImplemented':
             is_default = True
-        print(f'[{self.get_name()}{"(default strategy)" if is_default else ""}] {self.ip}:{self.PORT}')
+        print(
+            f'[{self.get_name()}{"(default strategy)" if is_default else ""}] {self.ip}:{self.PORT}'
+        )
         print(res, end='\n\n')
 
         out_dir = self.__out_path / self.get_name()
         out_dir.mkdir(exist_ok=True)
-        
+
         with (out_dir / 'things.txt').open('a') as f:
             res_f = str(res).replace("\n", "\\n").replace('\r', '')
             f.write(f'{self.ip}:{self.PORT} {res_f}\n')

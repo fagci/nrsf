@@ -1,9 +1,11 @@
-from time import sleep
-from handlers import Base
 from ftplib import FTP, FTP_TLS, error_perm, error_proto, error_reply, error_temp
+from time import sleep
+
+from handlers import Base
 
 INTERESTING_EXTENSIONS = ('.jpg', '.jpeg', '.png', '.gif', '.bmp')
 PATH_BLACKLIST = ('.', '..', 'bin')
+
 
 class Handler(Base):
     PORT = 21
@@ -39,7 +41,7 @@ class Handler(Base):
                     continue
 
                 ftp.cwd(path)
-                found = self.traverse(ftp, depth+1, files)
+                found = self.traverse(ftp, depth + 1, files)
                 ftp.cwd('..')
 
                 if found:
@@ -47,7 +49,6 @@ class Handler(Base):
 
             except error_perm:
                 pass
-
 
     def get_files(self, ftp: FTP):
         lst = [p for p in ftp.nlst() if p not in ('.', '..')]
@@ -62,7 +63,6 @@ class Handler(Base):
             pass
 
         return self.traverse(ftp)
-
 
     def post_open(self):
         Connector: type[FTP] = FTP
