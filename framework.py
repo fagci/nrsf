@@ -1,17 +1,21 @@
 from pathlib import Path
 from pkgutil import iter_modules
+from socket import setdefaulttimeout
 import sys
 
 from lib.generators import generate_ips
 from lib.processors import Processor
+
 OUTPUT_PATH = Path(__file__).resolve().parent / 'out'
 
+
 class NRSF:
-    def __init__(self, modules_to_load, iface, debug, workers, limit):
+    def __init__(self, modules_to_load, iface, debug, timeout, workers, limit):
         self.handlers = []
         self.proc = Processor()
         self.workers = workers
         self.limit = limit
+        setdefaulttimeout(timeout)
 
         for _, m, _ in iter_modules(['handlers']):
             if m.startswith('_') or (m.lower() not in modules_to_load):
@@ -32,6 +36,7 @@ class NRSF:
         else:
             print('No handlers loaded, exiting.')
             sys.exit()
+
     def scan(self, ip_address, _):
         for handler_class in self.handlers:
             ip = str(ip_address)
@@ -40,5 +45,5 @@ class NRSF:
                 handler.handle()
 
     def run(self):
-        self.proc.process_each(self.scan, generate_ips(self.limit), self.workers)
-
+        self.proc.process_each(self.scan, generate_ips(self.limit),
+                               self.workers)
