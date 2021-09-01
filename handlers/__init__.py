@@ -1,20 +1,47 @@
 from pathlib import Path
-from socket import timeout as SocketTimeoutError
+from socket import (
+    SOL_SOCKET,
+    SO_BINDTODEVICE,
+    SO_LINGER,
+    SO_REUSEADDR,
+    create_connection,
+    timeout as SocketTimeoutError,
+    socket as Socket
+)
+from struct import pack
 from threading import Lock
+from time import sleep, time
+from typing import Optional
+
+LINGER = pack('ii', 1, 0)
+
+class PortStatus:
+    UNKNOWN = 0
+    OPENED = 1
+    CLOSED = 2
+    FILTERED = 3
 
 class Base:
     PORT = 0
     TRIM = True
     SHOW_EMPTY = False
     DEBUG = False
+
     __print_lock: Lock
     __out_path: Path
+    port_status = PortStatus.UNKNOWN
+    socket: Optional[Socket] = None
 
-    def __init__(self, socket, ip):
-        self.socket = socket
+    def __init__(self, ip, iface=''):
         self.ip = ip
+        self.address = (ip, self.PORT)
+        if iface:
+            self.socket.setsockopt(SOL_SOCKET, SO_BINDTODEVICE, iface.encode())
 
     def handle(self):
+        """Make some things here while that port is open"""
+        if not self.socket:
+            return
         try:
             res = self.process()
             if self.TRIM and res:
@@ -26,13 +53,58 @@ class Base:
             raise
         except (ConnectionError, SocketTimeoutError) as e:
             if self.DEBUG:
-                print(f'[{self.name}]', repr(e))
+                print(f'[{self.get_name()}]', repr(e))
         except Exception as e:
             print(e)
             raise
 
-    def post(self):
+    def pre(self):
+        """Make some initial things here
+        ex.: wrap socket with SSL"""
         pass
+
+    def pre_open(self):
+        pass
+
+    def post(self):
+        """Make some things here after knowing that port is open
+        ex.: connect to FTP without wrapping socket or reinvent client"""
+        pass
+
+    def post_open(self):
+        pass
+
+    def __enter__(self):
+        self.pre()
+        start = time()
+
+        while time() - start < 2:
+            try:
+                self.socket = create_connection(self.address)
+                self.socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+                self.socket.setsockopt(SOL_SOCKET, SO_LINGER, LINGER)
+                self.port_status = PortStatus.OPENED
+                self.pre_open()
+            except KeyboardInterrupt:
+                raise
+            except SocketTimeoutError:
+                break
+            except OSError:
+                sleep(1)
+
+        return self
+      
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        if self.socket:
+            self.socket.close()
+        
+        self.post()
+
+        if self.socket:
+            self.post_open()
+
+        is_interrupt = isinstance(exc_value, KeyboardInterrupt)
+        return not is_interrupt
 
     def read(self, count=1024):
         return self.socket.recv(count).decode(errors='ignore')

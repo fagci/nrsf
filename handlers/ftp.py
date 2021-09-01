@@ -8,8 +8,11 @@ PATH_BLACKLIST = ('.', '..', 'bin')
 class Handler(Base):
     PORT = 21
 
-    def process(self):
+    def pre_open(self):
         self.files = set()
+
+    def process(self):
+        pass
 
     def traverse(self, ftp: FTP, depth=0, files=None):
         if files is None:
@@ -61,7 +64,7 @@ class Handler(Base):
         return self.traverse(ftp)
 
 
-    def post(self):
+    def post_open(self):
         Connector: type[FTP] = FTP
         retries = 5
 

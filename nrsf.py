@@ -3,8 +3,7 @@
 from argparse import ArgumentParser
 from pathlib import Path
 from pkgutil import iter_modules
-from socket import SOL_SOCKET, SO_BINDTODEVICE, SO_LINGER, SO_REUSEADDR, setdefaulttimeout, socket
-from struct import pack
+from socket import setdefaulttimeout
 import sys
 
 from lib.generators import generate_ips
@@ -12,26 +11,13 @@ from lib.processors import Processor
 
 OUTPUT_PATH = Path(__file__).resolve().parent / 'out'
 
-LINGER = pack('ii', 1, 0)
 
 def scan(ip_address, _, handlers, iface):
     for handler_class in handlers:
         ip = str(ip_address)
 
-        s = socket()
-        s.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-        s.setsockopt(SOL_SOCKET, SO_LINGER, LINGER)
-        if iface:
-            s.setsockopt(SOL_SOCKET, SO_BINDTODEVICE, iface.encode())
-
-        
-        status = s.connect_ex((ip, handler_class.PORT))
-
-        if status == 0:
-            handler = handler_class(s, ip)
+        with handler_class(ip, iface) as handler:
             handler.handle()
-            s.close()
-            handler.post()
 
 
 def stalk(limit, workers, modules_to_load, debug=False, iface=''):
