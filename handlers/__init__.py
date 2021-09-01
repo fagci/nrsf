@@ -80,10 +80,11 @@ class Base:
         while time() - start < 2:
             try:
                 self.socket = create_connection(self.address)
+                setsockopt = self.socket.setsockopt
                 if self.iface:
-                    self.socket.setsockopt(SOL_SOCKET, SO_BINDTODEVICE, self.iface.encode())
-                self.socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-                self.socket.setsockopt(SOL_SOCKET, SO_LINGER, LINGER)
+                    setsockopt(SOL_SOCKET, SO_BINDTODEVICE, self.iface.encode())
+                setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+                setsockopt(SOL_SOCKET, SO_LINGER, LINGER)
                 self.port_status = PortStatus.OPENED
                 self.pre_open()
             except KeyboardInterrupt:
