@@ -6,12 +6,10 @@ from socket import (
     SO_REUSEADDR,
     create_connection,
     timeout as SocketTimeoutError,
-    socket as Socket
 )
 from struct import pack
 from threading import Lock
 from time import sleep, time
-from typing import Optional
 
 LINGER = pack('ii', 1, 0)
 
@@ -27,16 +25,17 @@ class Base:
     SHOW_EMPTY = False
     DEBUG = False
 
+    __slots__ = ('__print_lock', '__out_path', 'port_status', 'socket', 'ip', 'address', 'iface')
+
     __print_lock: Lock
     __out_path: Path
-    port_status = PortStatus.UNKNOWN
-    socket: Optional[Socket] = None
 
     def __init__(self, ip, iface=''):
+        self.socket = None
+        self.iface = iface
         self.ip = ip
         self.address = (ip, self.PORT)
-        if iface:
-            self.socket.setsockopt(SOL_SOCKET, SO_BINDTODEVICE, iface.encode())
+        self.port_status = PortStatus.UNKNOWN
 
     def handle(self):
         """Make some things here while that port is open"""
@@ -81,6 +80,8 @@ class Base:
         while time() - start < 2:
             try:
                 self.socket = create_connection(self.address)
+                if self.iface:
+                    self.socket.setsockopt(SOL_SOCKET, SO_BINDTODEVICE, self.iface.encode())
                 self.socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
                 self.socket.setsockopt(SOL_SOCKET, SO_LINGER, LINGER)
                 self.port_status = PortStatus.OPENED
