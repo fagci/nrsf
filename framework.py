@@ -17,27 +17,29 @@ class NRSF:
         self.limit = limit
         setdefaulttimeout(timeout)
 
+        print('Loading handlers...')
+
         for _, m, _ in iter_modules(['handlers']):
             if m.startswith('_') or (m.lower() not in modules_to_load):
                 continue
             module = getattr(__import__(f'handlers.{m}'), m)
             handler = getattr(module, 'Handler')
+
             handler.set_iface(iface)
             handler.set_print_lock(self.proc.print_lock)
             handler.set_output_path(OUTPUT_PATH)
             if debug:
                 handler.DEBUG = True
+
             self.handlers.append(handler)
 
-        if self.handlers:
-            print('Loaded handlers:')
-            for h in self.handlers:
-                print('-', h.get_name(), f'({h.PORT} port)')
-        else:
+            print('-', handler.get_name(), f'({handler.PORT} port)')
+
+        if not self.handlers:
             print('No handlers loaded, exiting.')
             sys.exit()
 
-    def scan(self, ip_address, _):
+    def __scan(self, ip_address, _):
         for handler_class in self.handlers:
             ip = str(ip_address)
 
@@ -45,5 +47,5 @@ class NRSF:
                 handler.handle()
 
     def run(self):
-        self.proc.process_each(self.scan, generate_ips(self.limit),
+        self.proc.process_each(self.__scan, generate_ips(self.limit),
                                self.workers)
