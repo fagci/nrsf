@@ -80,11 +80,11 @@ class Base:
         return self.read()
 
     def post(self):
-        """Make some things here after knowing that port is open
-        ex.: connect to FTP without wrapping socket or reinvent client"""
         pass
 
     def post_open(self):
+        """Make some things here after knowing that port is open
+        ex.: connect to FTP without wrapping socket or reinvent client"""
         pass
 
     def __enter__(self):
