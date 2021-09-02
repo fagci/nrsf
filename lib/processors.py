@@ -1,24 +1,25 @@
 from threading import Lock, Thread
 from time import sleep
 
-class ProcessorThread(Thread):
-    def __init__(self, fn, gen, gl, pl, *args):
-        super().__init__(target=fn, daemon=True)
-        self.gen = iter(gen)
-        self.gl = gl
-        self.pl = pl
-        self.args = args
+class Processor:
+    def __init__(self, handlers):
+        self.handlers = handlers
+        self.threads = []
+        self.print_lock = Lock()
+        self.gen_lock = Lock()
 
-    def run(self):
+        for h in handlers:
+            h.set_print_lock(self.print_lock)
+
+    def __process(self):
         running = True
         while running:
             try:
-                with self.gl:
-                    item = next(self.gen)
-            except StopIteration:
-                break
-            try:
-                self._target(item, self.pl, *self.args)
+                with self.gen_lock:
+                    ip = str(next(self.gen))
+                for handler_class in self.handlers:
+                    with handler_class(ip) as handler:
+                        handler.handle()
             except StopIteration:
                 running = False
                 return
@@ -26,18 +27,13 @@ class ProcessorThread(Thread):
                 running = False
                 raise
 
-class Processor:
-    def __init__(self):
-        self.threads = []
-        self.gen_lock = Lock()
-        self.print_lock = Lock()
-
-    def process_each(self, fn, it, workers=16, *args):
+    def process(self, it, workers):
         threads = self.threads
         add_thread = threads.append
+        self.gen = iter(it)
 
         for _ in range(workers):
-            t = ProcessorThread(fn, it, self.gen_lock, self.print_lock, *args)
+            t = Thread(target=self.__process, daemon=True)
             add_thread(t)
 
         for t in threads:
@@ -48,3 +44,4 @@ class Processor:
                 sleep(0.5)
         except KeyboardInterrupt:
             print('Interrupted')
+

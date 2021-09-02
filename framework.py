@@ -1,6 +1,5 @@
 from pathlib import Path
 from pkgutil import iter_modules
-from socket import setdefaulttimeout
 import sys
 
 from lib.generators import generate_ips
@@ -11,11 +10,10 @@ OUTPUT_PATH = Path(__file__).resolve().parent / 'out'
 
 class NRSF:
     def __init__(self, modules_to_load, iface, debug, timeout, workers, limit):
-        self.handlers = []
-        self.proc = Processor()
-        self.workers = workers
         self.limit = limit
-        setdefaulttimeout(timeout)
+        self.workers = workers
+
+        handlers = []
 
         print('Loading handlers...')
 
@@ -26,26 +24,21 @@ class NRSF:
             handler = getattr(module, 'Handler')
 
             handler.set_iface(iface)
-            handler.set_print_lock(self.proc.print_lock)
+            handler.set_timeout(timeout)
             handler.set_output_path(OUTPUT_PATH)
             if debug:
                 handler.DEBUG = True
 
-            self.handlers.append(handler)
+            handlers.append(handler)
 
             print('-', handler.get_name(), f'({handler.PORT} port)')
 
-        if not self.handlers:
+        if not handlers:
             print('No handlers loaded, exiting.')
             sys.exit()
 
-    def __scan(self, ip_address, _):
-        for handler_class in self.handlers:
-            ip = str(ip_address)
+        self.proc = Processor(handlers)
 
-            with handler_class(ip) as handler:
-                handler.handle()
 
     def run(self):
-        self.proc.process_each(self.__scan, generate_ips(self.limit),
-                               self.workers)
+        self.proc.process(generate_ips(self.limit), self.workers)

@@ -6,6 +6,7 @@ from socket import (
     SO_REUSEADDR,
     create_connection,
     timeout as SocketTimeoutError,
+    setdefaulttimeout
 )
 from struct import pack
 from threading import Lock
@@ -27,7 +28,7 @@ class Base:
     SHOW_EMPTY = False
     DEBUG = False
 
-    __slots__ = ('__print_lock', '__out_path', 'port_status', 'socket', 'ip',
+    __slots__ = ('__print_lock', '__timeout', '__out_path', 'port_status', 'socket', 'ip',
                  'address', '__iface')
 
     __print_lock: Lock
@@ -87,6 +88,7 @@ class Base:
         while time() - start < 2:
             try:
                 self.socket = create_connection(self.address)
+                # self.socket.settimeout(self.__timeout)
                 setsockopt = self.socket.setsockopt
                 if self.__iface:
                     setsockopt(SOL_SOCKET, SO_BINDTODEVICE, self.__iface)
@@ -99,7 +101,7 @@ class Base:
             except SocketTimeoutError:
                 break
             except OSError:
-                sleep(1)
+                sleep(0.25)
 
         return self
 
@@ -148,6 +150,11 @@ class Base:
     @staticmethod
     def set_iface(iface):
         Base.__iface = iface.encode()
+
+    @staticmethod
+    def set_timeout(timeout):
+        setdefaulttimeout(timeout)
+        Base.__timeout = timeout
 
     @staticmethod
     def set_print_lock(lock):
