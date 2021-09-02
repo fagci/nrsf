@@ -1,16 +1,21 @@
 from threading import Lock, Thread
 from time import sleep
 
+
 class Processor:
-    __slots__ = ('__handlers','__threads','__gen','__gen_lock','__print_lock')
-    def __init__(self, handlers):
-        self.__handlers = handlers
+    __slots__ = ('__handlers', '__threads', '__gen', '__gen_lock',
+                 '__print_lock')
+
+    def __init__(self):
+        self.__handlers = []
         self.__threads = []
         self.__print_lock = Lock()
         self.__gen_lock = Lock()
 
-        for h in handlers:
-            h.set_print_lock(self.__print_lock)
+    def add_handler(self, handler):
+        handler.set_print_lock(self.__print_lock)
+        self.__handlers.append(handler)
+        print('+', handler.get_name(), f'({handler.PORT} port)')
 
     def __process(self):
         running = True
@@ -29,6 +34,10 @@ class Processor:
                 raise
 
     def process(self, it, workers):
+        if not self.__handlers:
+            print('No handlers loaded.')
+            return
+        print('Working...', end='\n\n')
         threads = self.__threads
         add_thread = threads.append
         self.__gen = iter(it)
@@ -45,4 +54,3 @@ class Processor:
                 sleep(0.5)
         except KeyboardInterrupt:
             print('Interrupted')
-

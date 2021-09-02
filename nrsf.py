@@ -18,5 +18,4 @@ if __name__ == '__main__':
 
     app = NRSF(args.modules, args.iface, args.debug, args.timeout, args.workers, args.limit)
 
-    print('Stalking...', end='\n\n')
     app.run()

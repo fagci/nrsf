@@ -1,6 +1,5 @@
 from pathlib import Path
 from pkgutil import iter_modules
-import sys
 
 from lib.generators import generate_ips
 from lib.processors import Processor
@@ -12,6 +11,7 @@ class NRSF:
     def __init__(self, modules_to_load, iface, debug, timeout, workers, limit):
         self.limit = limit
         self.workers = workers
+        self.proc = Processor()
 
         handlers = []
 
@@ -26,18 +26,12 @@ class NRSF:
             handler.set_iface(iface)
             handler.set_timeout(timeout)
             handler.set_output_path(OUTPUT_PATH)
+
             if debug:
                 handler.DEBUG = True
 
-            handlers.append(handler)
+            self.proc.add_handler(handler)
 
-            print('-', handler.get_name(), f'({handler.PORT} port)')
-
-        if not handlers:
-            print('No handlers loaded, exiting.')
-            sys.exit()
-
-        self.proc = Processor(handlers)
 
 
     def run(self):
