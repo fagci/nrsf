@@ -6,8 +6,6 @@ from socket import (
     SO_LINGER,
     SO_REUSEADDR,
     TCP_NODELAY,
-    create_connection,
-    setdefaulttimeout,
     socket as Socket,
     timeout as SocketTimeoutError,
 )
@@ -173,7 +171,6 @@ class Base:
 
     @staticmethod
     def set_timeout(timeout):
-        # setdefaulttimeout(timeout)
         Base.__timeout = timeout
 
     @staticmethod
