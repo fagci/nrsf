@@ -7,6 +7,7 @@ from socket import (
     create_connection,
     setdefaulttimeout,
     timeout as SocketTimeoutError,
+    socket as Socket,
 )
 from struct import pack
 import sys
@@ -37,12 +38,12 @@ class Base:
     __iface: bytes
 
     def __init__(self, ip):
-        self.socket = None
+        self.socket: Socket = None
         self.ip = ip
         self.address = (ip, self.PORT)
         self.port_status = PortStatus.UNKNOWN
 
-    def handle(self):
+    def __call__(self):
         """Make some things here while that port is open"""
         if not self.socket:
             return
@@ -72,6 +73,14 @@ class Base:
         ex.: wrap socket with SSL"""
         return socket
 
+    def setup(self):
+        # self.socket.settimeout(self.__timeout)
+        setsockopt = self.socket.setsockopt
+        if self.__iface:
+            setsockopt(SOL_SOCKET, SO_BINDTODEVICE, self.__iface)
+        setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+        setsockopt(SOL_SOCKET, SO_LINGER, LINGER)
+
     def pre_open(self):
         pass
 
@@ -94,12 +103,7 @@ class Base:
         while time() - start < 2:
             try:
                 self.socket = self.pre_wrap(create_connection(self.address))
-                # self.socket.settimeout(self.__timeout)
-                setsockopt = self.socket.setsockopt
-                if self.__iface:
-                    setsockopt(SOL_SOCKET, SO_BINDTODEVICE, self.__iface)
-                setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-                setsockopt(SOL_SOCKET, SO_LINGER, LINGER)
+                self.setup()
                 self.port_status = PortStatus.OPENED
                 self.pre_open()
             except KeyboardInterrupt:

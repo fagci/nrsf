@@ -30,10 +30,10 @@ class Processor:
         while True:
             try:
                 with self.__gen_lock:
-                    ip = str(next(self.__gen))
+                    ip = next(self.__gen)
                 for handler_class in self.__handlers:
                     with handler_class(ip) as handler:
-                        handler.handle()
+                        handler()
             except StopIteration:
                 return
             except:
