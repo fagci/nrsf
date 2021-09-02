@@ -6,9 +6,7 @@ from lib.processors import Processor
 
 
 class NRSF:
-    def __init__(self, modules_to_load, iface, debug, timeout, workers, limit, output_path):
-        self.limit = limit
-        self.workers = workers
+    def __init__(self, modules_to_load, iface, debug, timeout, output_path):
         self.proc = Processor()
 
         print('Loading handlers...')
@@ -28,5 +26,5 @@ class NRSF:
 
             self.proc.add_handler(handler)
 
-    def run(self):
-        self.proc.process(generate_ips(self.limit), self.workers)
+    def run(self, limit, workers):
+        self.proc.process(generate_ips(limit), workers)

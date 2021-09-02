@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
+from argparse import ArgumentParser
 from pathlib import Path
 
-from argparse import ArgumentParser
-
 from framework import NRSF
-
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Netrandom stalking framework')
@@ -21,6 +19,6 @@ if __name__ == '__main__':
 
     output_path = Path(args.output_path).resolve()
 
-    app = NRSF(args.modules, args.iface, args.debug, args.timeout, args.workers, args.limit, output_path)
+    app = NRSF(args.modules, args.iface, args.debug, args.timeout, output_path)
 
-    app.run()
+    app.run(args.limit, args.workers)
