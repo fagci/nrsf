@@ -101,7 +101,7 @@ class Base:
             except SocketTimeoutError:
                 break
             except OSError:
-                sleep(0.25)
+                sleep(1)
 
         return self
 
