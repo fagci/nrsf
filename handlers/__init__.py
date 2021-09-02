@@ -1,13 +1,15 @@
 from pathlib import Path
 from socket import (
     SOL_SOCKET,
+    SOL_TCP,
     SO_BINDTODEVICE,
     SO_LINGER,
     SO_REUSEADDR,
+    TCP_NODELAY,
     create_connection,
     setdefaulttimeout,
-    timeout as SocketTimeoutError,
     socket as Socket,
+    timeout as SocketTimeoutError,
 )
 from struct import pack
 import sys
@@ -26,18 +28,19 @@ class PortStatus:
 
 class Base:
     PORT = 0
-    TRIM = True
-    SHOW_EMPTY = False
+    TRIM_RESULT = True
+    SHOW_EMPTY_RESULT = False
     DEBUG = False
 
-    __slots__ = ('_print_lock', '__out_path', 'port_status', 'socket', 'ip',
-                 'address', '__iface')
+    __slots__ = ('_print_lock', '__out_path', 'port_status', 'socket',
+                 '_socket', 'ip', 'address', '__iface')
 
     _print_lock: Lock
     __out_path: Path
     __iface: bytes
 
     def __init__(self, ip):
+        self._socket: Socket = None
         self.socket: Socket = None
         self.ip = ip
         self.address = (ip, self.PORT)
@@ -47,11 +50,12 @@ class Base:
         """Make some things here while that port is open"""
         if not self.socket:
             return
+
         try:
             res = self.process()
-            if self.TRIM and res:
+            if self.TRIM_RESULT and res:
                 res = res.strip()
-            if res or self.SHOW_EMPTY:
+            if res or self.SHOW_EMPTY_RESULT:
                 with self._print_lock:
                     self.print(res)
         except KeyboardInterrupt:
@@ -62,10 +66,11 @@ class Base:
                     print(f'[{self.get_name()}]', repr(e), file=sys.stderr)
         except Exception as e:
             with self._print_lock:
-                print(e, file=sys.stderr)
+                print(repr(e), file=sys.stderr)
             raise
 
     def pre(self):
+        """Before connect"""
         pass
 
     def pre_wrap(self, socket):
@@ -74,14 +79,17 @@ class Base:
         return socket
 
     def setup(self):
-        # self.socket.settimeout(self.__timeout)
-        setsockopt = self.socket.setsockopt
+        """Set socket options"""
+        self._socket.settimeout(self.__timeout)
+        setsockopt = self._socket.setsockopt
         if self.__iface:
             setsockopt(SOL_SOCKET, SO_BINDTODEVICE, self.__iface)
         setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         setsockopt(SOL_SOCKET, SO_LINGER, LINGER)
+        setsockopt(SOL_TCP, TCP_NODELAY, True)
 
     def pre_open(self):
+        """Before process when socket open"""
         pass
 
     def process(self):
@@ -102,9 +110,11 @@ class Base:
 
         while time() - start < 2:
             try:
-                self.socket = self.pre_wrap(create_connection(self.address))
+                self._socket = Socket()
                 self.setup()
+                self._socket.connect(self.address)
                 self.port_status = PortStatus.OPENED
+                self.socket = self.pre_wrap(self._socket)
                 self.pre_open()
             except KeyboardInterrupt:
                 raise
@@ -163,8 +173,8 @@ class Base:
 
     @staticmethod
     def set_timeout(timeout):
-        setdefaulttimeout(timeout)
-        # Base.__timeout = timeout
+        # setdefaulttimeout(timeout)
+        Base.__timeout = timeout
 
     @staticmethod
     def set_print_lock(lock):
