@@ -65,9 +65,12 @@ class Base:
             raise
 
     def pre(self):
+        pass
+
+    def pre_wrap(self, socket):
         """Make some initial things here
         ex.: wrap socket with SSL"""
-        pass
+        return socket
 
     def pre_open(self):
         pass
@@ -90,7 +93,7 @@ class Base:
 
         while time() - start < 2:
             try:
-                self.socket = create_connection(self.address)
+                self.socket = self.pre_wrap(create_connection(self.address))
                 # self.socket.settimeout(self.__timeout)
                 setsockopt = self.socket.setsockopt
                 if self.__iface:
