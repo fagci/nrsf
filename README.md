@@ -27,17 +27,17 @@ FTP
 
 ```
 [ftp] 172.xxx.110.xxx:21
-{'DJI_0020.JPG'}
+DJI_0020.JPG
 ```
 
 ```
 [ftp] 76.xxx.184.xxx:21
-{'kraftwerk-greatest hits.jpg'}
+kraftwerk-greatest hits.jpg
 ```
 
 ```
 [ftp] 185.xxx.150.xxx:21
-{'Penguins.jpg'}
+Penguins.jpg
 ```
 
 Quote of the day
