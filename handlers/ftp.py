@@ -14,7 +14,9 @@ class Handler(Base):
         self.files = set()
 
     def process(self):
-        pass
+        if self.DEBUG:
+            with self._print_lock:
+                print(self.read())
 
     def traverse(self, ftp: FTP, depth=0, files=None):
         if files is None:

@@ -5,10 +5,11 @@ from socket import (
     SO_LINGER,
     SO_REUSEADDR,
     create_connection,
+    setdefaulttimeout,
     timeout as SocketTimeoutError,
-    setdefaulttimeout
 )
 from struct import pack
+import sys
 from threading import Lock
 from time import sleep, time
 
@@ -28,10 +29,10 @@ class Base:
     SHOW_EMPTY = False
     DEBUG = False
 
-    __slots__ = ('__print_lock', '__timeout', '__out_path', 'port_status', 'socket', 'ip',
-                 'address', '__iface')
+    __slots__ = ('_print_lock', '__timeout', '__out_path', 'port_status',
+                 'socket', 'ip', 'address', '__iface')
 
-    __print_lock: Lock
+    _print_lock: Lock
     __out_path: Path
     __iface: bytes
 
@@ -50,15 +51,17 @@ class Base:
             if self.TRIM and res:
                 res = res.strip()
             if res or self.SHOW_EMPTY:
-                with self.__print_lock:
+                with self._print_lock:
                     self.print(res)
         except KeyboardInterrupt:
             raise
         except (ConnectionError, SocketTimeoutError) as e:
             if self.DEBUG:
-                print(f'[{self.get_name()}]', repr(e))
+                with self._print_lock:
+                    print(f'[{self.get_name()}]', repr(e), file=sys.stderr)
         except Exception as e:
-            print(e)
+            with self._print_lock:
+                print(e, file=sys.stderr)
             raise
 
     def pre(self):
@@ -158,7 +161,7 @@ class Base:
 
     @staticmethod
     def set_print_lock(lock):
-        Base.__print_lock = lock
+        Base._print_lock = lock
 
     @staticmethod
     def set_output_path(path):
