@@ -29,8 +29,8 @@ class Base:
     SHOW_EMPTY = False
     DEBUG = False
 
-    __slots__ = ('_print_lock', '__timeout', '__out_path', 'port_status',
-                 'socket', 'ip', 'address', '__iface')
+    __slots__ = ('_print_lock', '__out_path', 'port_status', 'socket', 'ip',
+                 'address', '__iface')
 
     _print_lock: Lock
     __out_path: Path
@@ -157,7 +157,7 @@ class Base:
     @staticmethod
     def set_timeout(timeout):
         setdefaulttimeout(timeout)
-        Base.__timeout = timeout
+        # Base.__timeout = timeout
 
     @staticmethod
     def set_print_lock(lock):

@@ -18,54 +18,6 @@ class Handler(Base):
             with self._print_lock:
                 print(self.read())
 
-    def traverse(self, ftp: FTP, depth=0, files=None):
-        if files is None:
-            files = []
-
-        if depth > 10:
-            return
-
-        paths = [p for p in ftp.nlst() if p not in PATH_BLACKLIST]
-
-        for path in paths:
-            files.append(path)
-            if len(files) > 100:
-                return
-
-            try:
-                if path.lower().endswith(INTERESTING_EXTENSIONS):
-                    self.files.add(path)
-                    return path
-
-                # skip files by extension delimiter
-                if '.' in path:
-                    # print('-', path)
-                    continue
-
-                ftp.cwd(path)
-                found = self.traverse(ftp, depth + 1, files)
-                ftp.cwd('..')
-
-                if found:
-                    return
-
-            except error_perm:
-                pass
-
-    def get_files(self, ftp: FTP):
-        lst = [p for p in ftp.nlst() if p not in ('.', '..')]
-
-        if not lst:
-            return
-
-        banner = ''
-        try:
-            banner = ftp.getwelcome()
-        except:
-            pass
-
-        return self.traverse(ftp)
-
     def post_open(self):
         Connector: type[FTP] = FTP
         retries = 5
@@ -79,7 +31,7 @@ class Handler(Base):
                         ftp.encoding = 'utf-8'
                     except:
                         pass
-                    self.get_files(ftp)
+                    self._get_files(ftp)
             except (error_perm, error_proto) as e:
                 if Connector is FTP:
                     Connector = FTP_TLS
@@ -116,3 +68,45 @@ class Handler(Base):
 
         if self.files:
             self.print(' '.join(self.files))
+
+    def _traverse(self, ftp: FTP, depth=0, files=None):
+        if files is None:
+            files = []
+
+        if depth > 10:
+            return
+
+        paths = [p for p in ftp.nlst() if p not in PATH_BLACKLIST]
+
+        for path in paths:
+            files.append(path)
+            if len(files) > 100:
+                return
+
+            try:
+                if path.lower().endswith(INTERESTING_EXTENSIONS):
+                    self.files.add(path)
+                    return path
+
+                # skip files by extension delimiter
+                if '.' in path:
+                    # print('-', path)
+                    continue
+
+                ftp.cwd(path)
+                found = self._traverse(ftp, depth + 1, files)
+                ftp.cwd('..')
+
+                if found:
+                    return
+
+            except error_perm:
+                pass
+
+    def _get_files(self, ftp: FTP):
+        lst = [p for p in ftp.nlst() if p not in ('.', '..')]
+
+        if not lst:
+            return
+
+        return self._traverse(ftp)
