@@ -1,3 +1,4 @@
+from handlers import Base
 from threading import Lock, Thread
 from time import sleep
 
@@ -12,8 +13,16 @@ class Processor:
         self.__gen_lock = Lock()
         self.__print_lock = Lock()
 
-    def add_handler(self, handler):
+    def add_handler(self, handler:Base, output_path, iface, timeout, debug):
         handler.set_print_lock(self.__print_lock)
+
+        handler.set_output_path(output_path)
+        handler.set_iface(iface)
+        handler.set_timeout(timeout)
+
+        if debug:
+            handler.DEBUG = True
+
         self.__handlers.append(handler)
         print('+', handler.get_name(), f'({handler.PORT} port)')
 
