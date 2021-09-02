@@ -127,7 +127,7 @@ class Base:
         print(res, end='\n\n')
 
         out_dir = self.__out_path / self.get_name()
-        out_dir.mkdir(exist_ok=True)
+        out_dir.mkdir(exist_ok=True, parents=True)
 
         with (out_dir / 'things.txt').open('a') as f:
             res_f = str(res).replace("\n", "\\n").replace('\r', '')

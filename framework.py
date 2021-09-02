@@ -1,19 +1,15 @@
-from pathlib import Path
 from pkgutil import iter_modules
 
 from lib.generators import generate_ips
 from lib.processors import Processor
 
-OUTPUT_PATH = Path(__file__).resolve().parent / 'out'
 
 
 class NRSF:
-    def __init__(self, modules_to_load, iface, debug, timeout, workers, limit):
+    def __init__(self, modules_to_load, iface, debug, timeout, workers, limit, output_path):
         self.limit = limit
         self.workers = workers
         self.proc = Processor()
-
-        handlers = []
 
         print('Loading handlers...')
 
@@ -25,14 +21,12 @@ class NRSF:
 
             handler.set_iface(iface)
             handler.set_timeout(timeout)
-            handler.set_output_path(OUTPUT_PATH)
+            handler.set_output_path(output_path)
 
             if debug:
                 handler.DEBUG = True
 
             self.proc.add_handler(handler)
-
-
 
     def run(self):
         self.proc.process(generate_ips(self.limit), self.workers)

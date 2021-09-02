@@ -9,8 +9,8 @@ class Processor:
     def __init__(self):
         self.__handlers = []
         self.__threads = []
-        self.__print_lock = Lock()
         self.__gen_lock = Lock()
+        self.__print_lock = Lock()
 
     def add_handler(self, handler):
         handler.set_print_lock(self.__print_lock)
@@ -18,8 +18,7 @@ class Processor:
         print('+', handler.get_name(), f'({handler.PORT} port)')
 
     def __process(self):
-        running = True
-        while running:
+        while True:
             try:
                 with self.__gen_lock:
                     ip = str(next(self.__gen))
@@ -27,30 +26,29 @@ class Processor:
                     with handler_class(ip) as handler:
                         handler.handle()
             except StopIteration:
-                running = False
                 return
             except:
-                running = False
                 raise
 
     def process(self, it, workers):
         if not self.__handlers:
             print('No handlers loaded.')
             return
+
         print('Working...', end='\n\n')
+
         threads = self.__threads
-        add_thread = threads.append
         self.__gen = iter(it)
 
         for _ in range(workers):
             t = Thread(target=self.__process, daemon=True)
-            add_thread(t)
+            threads.append(t)
 
         for t in threads:
             t.start()
 
         try:
             while any(map(lambda t: t.is_alive(), threads)):
-                sleep(0.5)
+                sleep(0.25)
         except KeyboardInterrupt:
             print('Interrupted')
