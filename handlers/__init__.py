@@ -38,11 +38,11 @@ class Base:
     __iface: bytes
 
     def __init__(self, ip):
-        self._socket: Socket = None
         self.socket: Socket = None
         self.ip = ip
         self.address = (ip, self.PORT)
         self.port_status = PortStatus.UNKNOWN
+
 
     def __call__(self):
         """Make some things here while that port is open"""
@@ -54,8 +54,7 @@ class Base:
             if self.TRIM_RESULT and res:
                 res = res.strip()
             if res or self.SHOW_EMPTY_RESULT:
-                with self._print_lock:
-                    self.print(res)
+                self.print(res)
         except KeyboardInterrupt:
             raise
         except (ConnectionError, SocketTimeoutError) as e:
@@ -80,11 +79,11 @@ class Base:
         """Set socket options"""
         self._socket.settimeout(self.__timeout)
         setsockopt = self._socket.setsockopt
-        if self.__iface:
-            setsockopt(SOL_SOCKET, SO_BINDTODEVICE, self.__iface)
-        setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-        setsockopt(SOL_SOCKET, SO_LINGER, LINGER)
-        setsockopt(SOL_TCP, TCP_NODELAY, True)
+        # if self.__iface:
+        #     setsockopt(SOL_SOCKET, SO_BINDTODEVICE, self.__iface)
+        # setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+        # setsockopt(SOL_SOCKET, SO_LINGER, LINGER)
+        # setsockopt(SOL_TCP, TCP_NODELAY, True)
 
     def pre_open(self):
         """Before process when socket open"""
@@ -108,9 +107,12 @@ class Base:
 
         while time() - start < 2:
             try:
-                self._socket = Socket()
+                self._socket: Socket = Socket()
                 self.setup()
                 self._socket.connect(self.address)
+                if self.DEBUG:
+                    with self._print_lock:
+                        print('c', int((time()-start)*1000))
                 self.port_status = PortStatus.OPENED
                 self.socket = self.pre_wrap(self._socket)
                 self.pre_open()
@@ -118,7 +120,8 @@ class Base:
                 raise
             except SocketTimeoutError:
                 break
-            except OSError:
+            except OSError as e:
+                self.port_status = PortStatus.FILTERED
                 sleep(1)
 
         return self
@@ -139,17 +142,19 @@ class Base:
         is_default = False
         if self.process.__doc__ == 'NotImplemented':
             is_default = True
-        print(
-            f'[{self.get_name()}{"(default strategy)" if is_default else ""}] {self.ip}:{self.PORT}'
-        )
-        print(res, end='\n\n')
+        with self._print_lock:
+            print(
+                f'[{self.get_name()}{"(default strategy)" if is_default else ""}] {self.ip}:{self.PORT}'
+            )
+            print(res, end='\n\n')
 
         out_dir = self.__out_path / self.get_name()
         out_dir.mkdir(exist_ok=True, parents=True)
 
-        with (out_dir / 'things.txt').open('a') as f:
-            res_f = str(res).replace("\n", "\\n").replace('\r', '')
-            f.write(f'{self.ip}:{self.PORT} {res_f}\n')
+        with self._print_lock:
+            with (out_dir / 'things.txt').open('a') as f:
+                res_f = str(res).replace("\n", "\\n").replace('\r', '')
+                f.write(f'{self.ip}:{self.PORT} {res_f}\n')
 
     def read(self, count=1024):
         return self.socket.recv(count).decode(errors='ignore')
