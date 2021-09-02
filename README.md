@@ -97,10 +97,26 @@ HTTP
 ```
 [Http] 78.xxx.xxx.xxx:80
 Hello! Welcome to Synology Web Station!
+```
 
+```
 [Http] 74.xxx.xxx.xxx:80
 InMotion Hosting
+```
 
+```
 [Http] 20.56.xxx.xxx:80
 Your Azure Function App is up and running.
+```
+
+HTTPS
+
+```
+[https] 46.xxx.xxx.108:443
+Toby Manley – Actor – London
+```
+
+```
+[https] 35.xxx.xxx.53:443
+MCEA news and affairs
 ```
