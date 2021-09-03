@@ -5,7 +5,7 @@ class Handler(Base):
     PORT = 80
     DISALLOW_RE = re_compile(r'^User-agent:\s+\*$[\n\r]+^Disallow:\s+/$', IGNORECASE | MULTILINE)
 
-    def process(self):
+    def handle(self):
         robots_request = (
             'GET /robots.txt HTTP/1.1\r\n'
             f'Host: {self.ip}\r\n'

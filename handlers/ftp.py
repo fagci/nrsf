@@ -10,15 +10,13 @@ PATH_BLACKLIST = ('.', '..', 'bin')
 class Handler(Base):
     PORT = 21
 
-    def pre_open(self):
-        self.files = set()
-
-    def process(self):
+    def handle(self):
         if self.DEBUG:
             with self._print_lock:
                 print(self.read())
 
-    def post_open(self):
+    def post_disconnect(self):
+        self.files = set()
         Connector: type[FTP] = FTP
         retries = 5
 

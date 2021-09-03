@@ -3,7 +3,7 @@ from html.parser import HTMLParser
 
 class Handler(Base):
     PORT = 80
-    def process(self):
+    def handle(self):
         html = self.dialog(f'GET / HTTP/1.1\r\nHost: {self.ip}\r\n\r\n'.encode(), 4096)
         title_parser = TitleParser()
         title_parser.feed(html)

@@ -8,7 +8,7 @@ class Handler(HttpHandler):
 
     PORT = 443
     
-    def pre_wrap(self, socket):
+    def wrap(self, socket):
         self.__ctx = create_default_context()
         self.__ctx.check_hostname = False
         return self.__ctx.wrap_socket(socket, server_hostname=self.ip)

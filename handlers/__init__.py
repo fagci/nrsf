@@ -24,12 +24,25 @@ class PortStatus(Enum):
     CLOSED = 2
     FILTERED = 3
 
+
 class __Meta(type):
     def __repr__(cls):
         return cls.__module__.split('.')[-1]
 
 
 class Base(metaclass=__Meta):
+    """Base class for handlers.
+    Life cycle of handling:
+        pre_connect
+        setup
+        <connect>
+        wrap
+        post_connect
+        pre_handle
+        handle
+        post_handle
+        post_disconnect
+        """
     PORT = 0
     TRIM_RESULT = True
     SHOW_EMPTY_RESULT = False
@@ -48,34 +61,7 @@ class Base(metaclass=__Meta):
         self.address = (ip, self.PORT)
         self.port_status = PortStatus.UNKNOWN
 
-
-    def __call__(self):
-        """Make some things here while that port is open"""
-        if not self.socket:
-            return
-
-        try:
-            res = self.process()
-            if self.TRIM_RESULT and res:
-                res = res.strip()
-            if res or self.SHOW_EMPTY_RESULT:
-                self.print(res)
-        except KeyboardInterrupt:
-            raise
-        except (ConnectionError, SocketTimeoutError) as e:
-            if self.DEBUG:
-                with self._print_lock:
-                    print(f'[{self}]', repr(e), file=sys.stderr)
-        except Exception as e:
-            with self._print_lock:
-                print(repr(e), file=sys.stderr)
-            raise
-
-    def pre(self):
-        """Before connect"""
-        pass
-
-    def pre_wrap(self, socket):
+    def wrap(self, socket):
         """Make some initial things here
         ex.: wrap socket with SSL"""
         return socket
@@ -90,24 +76,30 @@ class Base(metaclass=__Meta):
         setsockopt(SOL_SOCKET, SO_LINGER, LINGER)
         setsockopt(SOL_TCP, TCP_NODELAY, True)
 
-    def pre_open(self):
+    def pre_connect(self):
+        pass
+
+    def post_connect(self):
         """Before process when socket open"""
         pass
 
-    def process(self):
+    def pre_handle(self):
+        pass
+
+    def handle(self):
         """NotImplemented"""
         return self.read()
 
-    def post(self):
+    def post_handle(self):
         pass
 
-    def post_open(self):
+    def post_disconnect(self):
         """Make some things here after knowing that port is open
         ex.: connect to FTP without wrapping socket or reinvent client"""
         pass
 
     def __enter__(self):
-        self.pre()
+        self.pre_connect()
         start = time()
 
         while time() - start < 2:
@@ -117,10 +109,9 @@ class Base(metaclass=__Meta):
                 self._socket.connect(self.address)
                 if self.DEBUG:
                     with self._print_lock:
-                        print('c', int((time()-start)*1000))
+                        print('c', int((time() - start) * 1000))
                 self.port_status = PortStatus.OPENED
-                self.socket = self.pre_wrap(self._socket)
-                self.pre_open()
+                self.socket = self.wrap(self._socket)
             except KeyboardInterrupt:
                 raise
             except SocketTimeoutError:
@@ -128,17 +119,41 @@ class Base(metaclass=__Meta):
             except OSError as e:
                 self.port_status = PortStatus.FILTERED
                 sleep(1)
+            else:
+                self.post_connect()
 
         return self
+
+    def __call__(self):
+        """Make some things here while that port is open"""
+        if not self.socket:
+            return
+
+        self.pre_handle()
+
+        try:
+            res = self.handle()
+            if self.TRIM_RESULT and res:
+                res = res.strip()
+            if res or self.SHOW_EMPTY_RESULT:
+                self.print(res)
+        except KeyboardInterrupt:
+            raise
+        except (ConnectionError, SocketTimeoutError) as e:
+            if self.DEBUG:
+                with self._print_lock:
+                    print(f'[{self}]', repr(e), file=sys.stderr)
+        except Exception as e:
+            with self._print_lock:
+                print(repr(e), file=sys.stderr)
+            raise
+        else:
+            self.post_handle()
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         if self.socket:
             self.socket.close()
-
-        self.post()
-
-        if self.socket:
-            self.post_open()
+            self.post_disconnect()
 
         is_interrupt = isinstance(exc_value, KeyboardInterrupt)
         return not is_interrupt
@@ -171,7 +186,7 @@ class Base(metaclass=__Meta):
         return f'{self.ip}:{self.PORT}'
 
     def __str__(self):
-        is_default = self.process.__doc__ == Base.process.__doc__
+        is_default = self.handle.__doc__ == Base.handle.__doc__
         return f'[{self.__class__}{"(default strategy)" if is_default else ""}] {self.netloc} ({self.port_status.name})'
 
     def __repr__(self):
