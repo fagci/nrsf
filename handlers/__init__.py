@@ -23,8 +23,12 @@ class PortStatus:
     CLOSED = 2
     FILTERED = 3
 
+class __Meta(type):
+    def __repr__(cls):
+        return cls.__module__.split('.')[-1]
 
-class Base:
+
+class Base(metaclass=__Meta):
     PORT = 0
     TRIM_RESULT = True
     SHOW_EMPTY_RESULT = False
@@ -60,7 +64,7 @@ class Base:
         except (ConnectionError, SocketTimeoutError) as e:
             if self.DEBUG:
                 with self._print_lock:
-                    print(f'[{self.get_name()}]', repr(e), file=sys.stderr)
+                    print(f'[{self}]', repr(e), file=sys.stderr)
         except Exception as e:
             with self._print_lock:
                 print(repr(e), file=sys.stderr)
@@ -79,11 +83,11 @@ class Base:
         """Set socket options"""
         self._socket.settimeout(self.__timeout)
         setsockopt = self._socket.setsockopt
-        # if self.__iface:
-        #     setsockopt(SOL_SOCKET, SO_BINDTODEVICE, self.__iface)
-        # setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-        # setsockopt(SOL_SOCKET, SO_LINGER, LINGER)
-        # setsockopt(SOL_TCP, TCP_NODELAY, True)
+        if self.__iface:
+            setsockopt(SOL_SOCKET, SO_BINDTODEVICE, self.__iface)
+        setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+        setsockopt(SOL_SOCKET, SO_LINGER, LINGER)
+        setsockopt(SOL_TCP, TCP_NODELAY, True)
 
     def pre_open(self):
         """Before process when socket open"""
@@ -139,22 +143,17 @@ class Base:
         return not is_interrupt
 
     def print(self, res):
-        is_default = False
-        if self.process.__doc__ == 'NotImplemented':
-            is_default = True
         with self._print_lock:
-            print(
-                f'[{self.get_name()}{"(default strategy)" if is_default else ""}] {self.ip}:{self.PORT}'
-            )
+            print(self)
             print(res, end='\n\n')
 
-        out_dir = self.__out_path / self.get_name()
+        out_dir = self.__out_path / str(self)
         out_dir.mkdir(exist_ok=True, parents=True)
 
         with self._print_lock:
             with (out_dir / 'things.txt').open('a') as f:
                 res_f = str(res).replace("\n", "\\n").replace('\r', '')
-                f.write(f'{self.ip}:{self.PORT} {res_f}\n')
+                f.write(f'{self.netloc} {res_f}\n')
 
     def read(self, count=1024):
         return self.socket.recv(count).decode(errors='ignore')
@@ -166,9 +165,18 @@ class Base:
         self.write(text)
         return self.read(count)
 
-    @classmethod
-    def get_name(cls):
-        return cls.__module__.split('.')[-1]
+    @property
+    def netloc(self):
+        return f'{self.ip}:{self.PORT}'
+
+    def __str__(self):
+        is_default = False
+        if self.process.__doc__ == 'NotImplemented':
+            is_default = True
+        return f'[{self.__class__}{"(default strategy)" if is_default else ""}] {self.netloc}'
+
+    def __repr__(self):
+        return f'<{self} {self.netloc}>'
 
     @staticmethod
     def set_iface(iface):

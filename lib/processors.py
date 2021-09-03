@@ -24,7 +24,7 @@ class Processor:
             handler.DEBUG = True
 
         self.__handlers.append(handler)
-        print('+', handler.get_name(), f'({handler.PORT} port)')
+        print('+', repr(handler), f'({handler.PORT} port)')
 
     def __process(self):
         while True:
