@@ -1,3 +1,4 @@
+from enum import Enum
 from pathlib import Path
 from socket import (
     SOL_SOCKET,
@@ -17,7 +18,7 @@ from time import sleep, time
 LINGER = pack('ii', 1, 0)
 
 
-class PortStatus:
+class PortStatus(Enum):
     UNKNOWN = 0
     OPENED = 1
     CLOSED = 2
@@ -170,10 +171,8 @@ class Base(metaclass=__Meta):
         return f'{self.ip}:{self.PORT}'
 
     def __str__(self):
-        is_default = False
-        if self.process.__doc__ == 'NotImplemented':
-            is_default = True
-        return f'[{self.__class__}{"(default strategy)" if is_default else ""}] {self.netloc}'
+        is_default = self.process.__doc__ == Base.process.__doc__
+        return f'[{self.__class__}{"(default strategy)" if is_default else ""}] {self.netloc} ({self.port_status.name})'
 
     def __repr__(self):
         return f'<{self} {self.netloc}>'
