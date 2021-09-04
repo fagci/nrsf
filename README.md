@@ -6,7 +6,10 @@ Netwotk research & automated information gathering framework. Without dependenci
 ## Usage
 
 ```
-nrsf.py [-h] [--timeout TIMEOUT] [--limit LIMIT] [--workers WORKERS] [--debug DEBUG] modules [modules ...]
+nrsf.py [-h] [--timeout TIMEOUT] [--limit LIMIT]
+               [--workers WORKERS] [--debug DEBUG] [--iface IFACE]
+               [--output_path OUTPUT_PATH] [--network NETWORK]
+               modules [modules ...]
 
 Netrandom stalking framework
 
@@ -14,11 +17,14 @@ positional arguments:
   modules
 
 optional arguments:
-  -h, --help         show this help message and exit
+  -h, --help            show this help message and exit
   --timeout TIMEOUT
   --limit LIMIT
   --workers WORKERS
   --debug DEBUG
+  --iface IFACE
+  --output_path OUTPUT_PATH
+  --network NETWORK
 ```
 
 ## Gathered samples
