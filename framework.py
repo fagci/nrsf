@@ -18,5 +18,5 @@ class NRSF:
 
             self.proc.add_handler(handler, output_path, iface, timeout, debug)
 
-    def run(self, limit, workers):
-        self.proc.process(generate_ips(limit), workers)
+    def run(self, limit, workers, network):
+        self.proc.process(generate_ips(limit, network), workers)
