@@ -26,6 +26,11 @@ optional arguments:
 FTP
 
 ```
+[ftp] 109.xxx.33.xxx:21 (OPENED)
+small_Topaze.JPG
+```
+
+```
 [ftp] 172.xxx.110.xxx:21
 DJI_0020.JPG
 ```
