@@ -163,7 +163,7 @@ class Base(metaclass=__Meta):
             print(self)
             print(res, end='\n\n')
 
-        out_dir = self.__out_path / str(self)
+        out_dir = self.__out_path / str(self.__class__)
         out_dir.mkdir(exist_ok=True, parents=True)
 
         with self._print_lock:
