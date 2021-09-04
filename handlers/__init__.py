@@ -187,7 +187,7 @@ class Base(metaclass=__Meta):
 
     def __str__(self):
         is_default = self.handle.__doc__ == Base.handle.__doc__
-        return f'[{self.__class__}{"(default strategy)" if is_default else ""}] {self.netloc} ({self.port_status.name})'
+        return f'[{self.__class__}{"(default strategy)" if is_default else ""}] {self.netloc} {self.port_status.name}'
 
     def __repr__(self):
         return f'<{self} {self.netloc}>'
