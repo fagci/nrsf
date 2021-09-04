@@ -8,12 +8,12 @@ if __name__ == '__main__':
     parser = ArgumentParser(description='Netrandom stalking framework')
 
     parser.add_argument('modules', type=str, nargs='+', default=[])
-    parser.add_argument('--timeout', type=float, default=1)
-    parser.add_argument('--limit', type=int, default=1000000)
-    parser.add_argument('--workers', type=int, default=512)
-    parser.add_argument('--debug', type=bool, default=False)
-    parser.add_argument('--iface', type=str, default='')
-    parser.add_argument('--output_path', type=str, default='./out')
+    parser.add_argument('-t', '--timeout', type=float, default=1)
+    parser.add_argument('-l', '--limit', type=int, default=1000000)
+    parser.add_argument('-w', '--workers', type=int, default=512)
+    parser.add_argument('-d', '--debug', type=bool, default=False)
+    parser.add_argument('-i', '--iface', type=str, default='')
+    parser.add_argument('-o', '--output_path', type=str, default='./out')
     parser.add_argument('--network', type=str, default='')
 
     args = parser.parse_args()
