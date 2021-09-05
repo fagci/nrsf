@@ -160,6 +160,7 @@ class Base(metaclass=__Meta):
         return not is_interrupt
 
     def print(self, res):
+        """Prints result to terminal and file"""
         dt = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
         out = []
 
