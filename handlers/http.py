@@ -19,7 +19,7 @@ class Handler(Base):
                 print(html)
         title_parser = TitleParser()
         title_parser.feed(html)
-        return title_parser.title.replace('\n', ' ').replace('\r', '')
+        return title_parser.title.replace('\n', ' ').replace('\r', '').strip()
 
 class TitleParser(HTMLParser):
     def __init__(self):
