@@ -107,16 +107,19 @@ class Base(metaclass=__Meta):
                 self._socket: Socket = Socket()
                 self.setup()
                 self._socket.connect(self.address)
+                self.port_status = PortStatus.OPENED
                 if self.DEBUG:
                     with self._print_lock:
-                        print('c', int((time() - start) * 1000))
-                self.port_status = PortStatus.OPENED
+                        print(f'{self}', int((time() - start) * 1000), 'ms')
                 self.socket = self.wrap(self._socket)
             except KeyboardInterrupt:
                 raise
             except SocketTimeoutError:
                 break
             except OSError as e:
+                if self.DEBUG:
+                    with self._print_lock:
+                        print(f'{self}\n{repr(e)}')
                 self.port_status = PortStatus.FILTERED
                 sleep(1)
             else:

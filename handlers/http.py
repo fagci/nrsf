@@ -4,7 +4,15 @@ from html.parser import HTMLParser
 class Handler(Base):
     PORT = 80
     def handle(self):
-        html = self.dialog(f'GET / HTTP/1.1\r\nHost: {self.ip}\r\n\r\n'.encode(), 4096)
+        html = self.dialog((
+            'GET / HTTP/1.1\r\n'
+            'User-Agent: Mozilla/5.0\r\n'
+            f'Host: {self.ip}\r\n'
+            '\r\n'
+        ).encode(), 4096)
+        if self.DEBUG:
+            with self._print_lock:
+                print(html)
         title_parser = TitleParser()
         title_parser.feed(html)
         return title_parser.title.replace('\n', ' ').replace('\r', '')

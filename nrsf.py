@@ -11,7 +11,7 @@ if __name__ == '__main__':
     parser.add_argument('-t', '--timeout', type=float, default=1)
     parser.add_argument('-l', '--limit', type=int, default=1000000)
     parser.add_argument('-w', '--workers', type=int, default=512)
-    parser.add_argument('-d', '--debug', action='store_true')
+    parser.add_argument('-d', '--debug', default=False, action='store_true')
     parser.add_argument('-i', '--iface', type=str, default='')
     parser.add_argument('-o', '--output_path', type=str, default='./out')
     parser.add_argument('--network', type=str, default='')
