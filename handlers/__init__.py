@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from socket import (
@@ -159,6 +160,7 @@ class Base(metaclass=__Meta):
         return not is_interrupt
 
     def print(self, res):
+        dt = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
         out = []
 
         if not res:
@@ -189,7 +191,7 @@ class Base(metaclass=__Meta):
         with self._print_lock:
             with (out_dir / 'things.txt').open('a') as f:
                 res_f = out_str.replace("\n", "\\n").replace('\r', '')
-                f.write(f'{self.netloc} {res_f}\n')
+                f.write(f'{dt} {self.netloc} {res_f}\n')
 
     def read(self, count=1024):
         return self.socket.recv(count).decode(errors='ignore')
