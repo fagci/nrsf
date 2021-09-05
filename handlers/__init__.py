@@ -44,7 +44,6 @@ class Base(metaclass=__Meta):
         post_disconnect
         """
     PORT = 0
-    TRIM_RESULT = True
     SHOW_EMPTY_RESULT = False
     DEBUG = False
 
@@ -136,8 +135,6 @@ class Base(metaclass=__Meta):
 
         try:
             res = self.handle()
-            if self.TRIM_RESULT and res:
-                res = res.strip()
             if res or self.SHOW_EMPTY_RESULT:
                 self.print(res)
         except KeyboardInterrupt:
@@ -162,16 +159,36 @@ class Base(metaclass=__Meta):
         return not is_interrupt
 
     def print(self, res):
+        out = []
+
+        if not res:
+            out.append('no data')
+        elif isinstance(res, dict):
+            for n, r in res.items():
+                if isinstance(r, str):
+                    out.append(f'{n}: {r}')
+                else:
+                    out.append(f'{n}: {", ".join(r)}')
+        elif isinstance(res, list):
+            out.append(', '.join(res))
+        elif isinstance(res, set):
+            for r in res:
+                out.append(r)
+        elif not isinstance(res, bool):
+            out.append(res)
+
+        out_str = '\n'.join(out)
+
         with self._print_lock:
             print(self)
-            print(res, end='\n\n')
+            print(out_str, end='\n\n')
 
         out_dir = self.__out_path / str(self.__class__)
         out_dir.mkdir(exist_ok=True, parents=True)
 
         with self._print_lock:
             with (out_dir / 'things.txt').open('a') as f:
-                res_f = str(res).replace("\n", "\\n").replace('\r', '')
+                res_f = out_str.replace("\n", "\\n").replace('\r', '')
                 f.write(f'{self.netloc} {res_f}\n')
 
     def read(self, count=1024):
