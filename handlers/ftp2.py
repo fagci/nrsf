@@ -16,7 +16,7 @@ class Handler(Base):
             path = ''
 
         for fname in self.ftp.nlst():
-            if fname in ('.', '..'):
+            if fname in ('.', '..', 'bin'):
                 continue
             cpath = f'{path}/{fname}'
             possibly_file = '.' in fname and len(fname.rsplit('.', 1)[-1]) < 6
@@ -35,7 +35,7 @@ class Handler(Base):
     def post_disconnect(self):
         try:
             self.ftp = FTP()
-            self.ftp.connect(self.ip, self.PORT, 5)
+            self.ftp.connect(self.ip, self.PORT, 15)
             if self.ftp.login().startswith('230'):
                 self.traverse_files(3, '')
         except Exception as e:
