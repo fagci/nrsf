@@ -4,10 +4,13 @@ from html.parser import HTMLParser
 class Handler(Base):
     PORT = 80
     def handle(self):
+        return self.handle_host(self.ip)
+
+    def handle_host(self, hostname):
         html = self.dialog((
             'GET / HTTP/1.1\r\n'
             'User-Agent: Mozilla/5.0\r\n'
-            f'Host: {self.ip}\r\n'
+            f'Host: {hostname}\r\n'
             '\r\n'
         ).encode(), 4096)
         if self.DEBUG:

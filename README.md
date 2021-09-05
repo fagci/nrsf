@@ -123,6 +123,18 @@ Your Azure Function App is up and running.
 HTTPS
 
 ```
+[https] 185.xxx.xxx.xx0:443 OPENED
+mail.***.co.uk:
+cpanel.***.co.uk:                                                   
+www.***.co.uk:
+cpcalendars.***.co.uk:
+cpcontacts.***.co.uk: cPanel Login                                  
+webmail.***.co.uk:
+***.co.uk:
+webdisk.***.co.uk:
+```
+
+```
 [https] 46.xxx.xxx.108:443
 Toby Manley – Actor – London
 ```
