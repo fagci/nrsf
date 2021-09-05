@@ -9,8 +9,9 @@ class Handler(Base):
     def handle_host(self, hostname):
         html = self.dialog((
             'GET / HTTP/1.1\r\n'
-            'User-Agent: Mozilla/5.0\r\n'
             f'Host: {hostname}\r\n'
+            'User-Agent: Mozilla/5.0\r\n'
+            'Accept: text/html\r\n'
             '\r\n'
         ).encode(), 4096)
         if self.DEBUG:

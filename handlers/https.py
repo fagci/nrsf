@@ -21,12 +21,14 @@ class Handler(HttpHandler):
             self.domains = [v for _, v in ssl_info.get('subjectAltName', [])]
         except: # not connected
             self.domains = []
+        self.domains.insert(0, self.ip)
 
     def handle(self):
         results = set()
         for d in self.domains:
             if d.startswith('*'):
                 continue # skip wildcards for now
-            results.add(d + ': ' + self.handle_host(d))
-        results.add(super().handle())
+            res = self.handle_host(d)
+            if res:
+                results.add(d + ': ' + res)
         return results

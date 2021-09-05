@@ -161,7 +161,6 @@ class Base(metaclass=__Meta):
 
     def print(self, res):
         """Prints result to terminal and file"""
-        dt = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
         out = []
 
         if not res:
@@ -185,14 +184,21 @@ class Base(metaclass=__Meta):
         with self._print_lock:
             print(self)
             print(out_str, end='\n\n')
+        
+        self.write_log(res)
 
+
+    def write_log(self, res):
+        results = res if isinstance(res, list) or isinstance(res, set) else [str(res)]
+        dt = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
         out_dir = self.__out_path / str(self.__class__)
         out_dir.mkdir(exist_ok=True, parents=True)
 
         with self._print_lock:
             with (out_dir / 'things.txt').open('a') as f:
-                res_f = out_str.replace("\n", "\\n").replace('\r', '')
-                f.write(f'{dt} {self.netloc} {res_f}\n')
+                for r in results:
+                    res_f = r.replace("\n", "\\n").replace('\r', '')
+                    f.write(f'{dt} {self.netloc} {res_f}\n')
 
     def read(self, count=1024):
         return self.socket.recv(count).decode(errors='ignore')
