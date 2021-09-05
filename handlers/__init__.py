@@ -55,7 +55,7 @@ class Base(metaclass=__Meta):
     __out_path: Path
     __iface: bytes
 
-    def __init__(self, ip):
+    def __init__(self, ip, args):
         self.socket: Socket = None
         self.ip = ip
         self.address = (ip, self.PORT)

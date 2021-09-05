@@ -16,10 +16,10 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--output_path', type=str, default='./out')
     parser.add_argument('--network', type=str, default='')
 
-    args = parser.parse_args()
+    args, unknown = parser.parse_known_args()
 
     output_path = Path(args.output_path).resolve()
 
-    app = NRSF(args.modules, args.iface, args.debug, args.timeout, output_path)
+    app = NRSF(args.modules, args.iface, args.debug, args.timeout, output_path, unknown)
 
     app.run(args.limit, args.workers, args.network)

@@ -5,8 +5,8 @@ from lib.processors import Processor
 
 
 class NRSF:
-    def __init__(self, modules_to_load, iface, debug, timeout, output_path):
-        self.proc = Processor()
+    def __init__(self, modules_to_load, iface, debug, timeout, output_path, unknown_args):
+        self.proc = Processor(unknown_args)
 
         print('Loading handlers...')
 

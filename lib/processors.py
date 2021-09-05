@@ -5,14 +5,15 @@ from time import sleep
 
 class Processor:
     __slots__ = ('__handlers', '__threads', '__gen', '__gen_lock',
-                 '__print_lock', 'run_event')
+                 '__print_lock', 'run_event', 'args')
 
-    def __init__(self):
+    def __init__(self, args):
         self.__handlers = []
         self.__threads = []
         self.__gen_lock = Lock()
         self.__print_lock = Lock()
         self.run_event = Event()
+        self.args = args
 
     def add_handler(self, handler:Base, output_path, iface, timeout, debug):
         handler.set_print_lock(self.__print_lock)
@@ -33,7 +34,7 @@ class Processor:
                 with self.__gen_lock:
                     ip = next(self.__gen)
                 for handler_class in self.__handlers:
-                    with handler_class(ip) as handler:
+                    with handler_class(ip, self.args) as handler:
                         handler()
             except StopIteration:
                 return
