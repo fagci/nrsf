@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
@@ -222,8 +223,19 @@ class Base(metaclass=__Meta):
         return f'<{self} {self.netloc}>'
 
     @staticmethod
-    def set_args(args):
-        pass
+    def set_debug(debug):
+        if debug:
+            Base.DEBUG = True
+
+    @classmethod
+    def set_args(cls, args: list):
+        argparser = ArgumentParser()
+        _, unknown_args = argparser.parse_known_args(args)
+        for unknown_arg in unknown_args:
+            if unknown_arg.startswith('-'):
+                argparser.add_argument(unknown_arg)
+        cls.args = argparser.parse_args(args)
+        print(cls.args)
 
     @staticmethod
     def set_iface(iface):

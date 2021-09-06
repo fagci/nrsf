@@ -21,9 +21,7 @@ class Processor:
         handler.set_iface(iface)
         handler.set_timeout(timeout)
         handler.set_args(args)
-
-        if debug:
-            handler.DEBUG = True
+        handler.set_debug(debug)
 
         self.__handlers.append(handler)
         print('+', repr(handler), f'({handler.PORT} port)')
