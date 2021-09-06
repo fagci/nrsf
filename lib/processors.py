@@ -30,16 +30,13 @@ class Processor:
 
     def __process(self):
         while self.run_event.is_set():
-            try:
-                with self.__gen_lock:
-                    ip = next(self.__gen)
-                for handler_class in self.__handlers:
-                    with handler_class(ip) as handler:
-                        handler()
-            except StopIteration:
-                return
-            except:
-                raise
+            with self.__gen_lock:
+                ip = next(self.__gen, None)
+            if not ip:
+                break
+            for handler_class in self.__handlers:
+                with handler_class(ip) as handler:
+                    handler()
 
     def process(self, it, workers):
         if not self.__handlers:
