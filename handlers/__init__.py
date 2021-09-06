@@ -235,7 +235,6 @@ class Base(metaclass=__Meta):
             if unknown_arg.startswith('-'):
                 argparser.add_argument(unknown_arg)
         cls.args = argparser.parse_args(args)
-        print(cls.args)
 
     @staticmethod
     def set_iface(iface):

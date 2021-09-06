@@ -1,5 +1,4 @@
-from handlers import Base
-from threading import Lock, Thread, Event
+from threading import Event, Lock, Thread
 from time import sleep
 
 
@@ -14,7 +13,7 @@ class Processor:
         self.__print_lock = Lock()
         self.run_event = Event()
 
-    def add_handler(self, handler:Base, output_path, iface, timeout, debug, args):
+    def add_handler(self, handler, output_path, iface, timeout, debug, args):
         handler.set_print_lock(self.__print_lock)
 
         handler.set_output_path(output_path)
@@ -24,7 +23,7 @@ class Processor:
         handler.set_debug(debug)
 
         self.__handlers.append(handler)
-        print('+', repr(handler), f'({handler.PORT} port)')
+        print('+', repr(handler), f':{handler.PORT}')
 
     def __process(self):
         while self.run_event.is_set():
@@ -43,7 +42,6 @@ class Processor:
 
         self.run_event.set()
 
-        print('Working...', end='\n\n')
 
         threads = self.__threads
         self.__gen = iter(it)
@@ -51,6 +49,8 @@ class Processor:
         for _ in range(workers):
             t = Thread(target=self.__process, daemon=True)
             threads.append(t)
+
+        print('Working...', end='\n\n')
 
         for t in threads:
             t.start()
@@ -61,8 +61,9 @@ class Processor:
         except:
             pass
 
-        print('Stopping threads...')
         self.run_event.clear()
+        print('Stopping threads...')
+
         try:
             for t in threads:
                 t.join()
