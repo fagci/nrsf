@@ -7,20 +7,20 @@ class Processor:
     __slots__ = ('__handlers', '__threads', '__gen', '__gen_lock',
                  '__print_lock', 'run_event', 'args')
 
-    def __init__(self, args):
+    def __init__(self):
         self.__handlers = []
         self.__threads = []
         self.__gen_lock = Lock()
         self.__print_lock = Lock()
         self.run_event = Event()
-        self.args = args
 
-    def add_handler(self, handler:Base, output_path, iface, timeout, debug):
+    def add_handler(self, handler:Base, output_path, iface, timeout, debug, args):
         handler.set_print_lock(self.__print_lock)
 
         handler.set_output_path(output_path)
         handler.set_iface(iface)
         handler.set_timeout(timeout)
+        handler.set_args(args)
 
         if debug:
             handler.DEBUG = True
@@ -34,7 +34,7 @@ class Processor:
                 with self.__gen_lock:
                     ip = next(self.__gen)
                 for handler_class in self.__handlers:
-                    with handler_class(ip, self.args) as handler:
+                    with handler_class(ip) as handler:
                         handler()
             except StopIteration:
                 return

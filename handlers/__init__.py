@@ -55,7 +55,7 @@ class Base(metaclass=__Meta):
     __out_path: Path
     __iface: bytes
 
-    def __init__(self, ip, args):
+    def __init__(self, ip):
         self.socket: Socket = None
         self.ip = ip
         self.address = (ip, self.PORT)
@@ -220,6 +220,10 @@ class Base(metaclass=__Meta):
 
     def __repr__(self):
         return f'<{self} {self.netloc}>'
+
+    @staticmethod
+    def set_args(args):
+        pass
 
     @staticmethod
     def set_iface(iface):
