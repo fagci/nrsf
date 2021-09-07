@@ -33,7 +33,7 @@ class TitleParser(HTMLParser):
         self.title = ''
 
     def handle_starttag(self, tag, _):
-        self.match = tag == 'title' or tag == 'TITLE'
+        self.match = tag in ['title', 'TITLE']
 
     def handle_data(self, data):
         if self.match:

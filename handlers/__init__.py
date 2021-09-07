@@ -190,7 +190,7 @@ class Base(metaclass=__Meta):
 
 
     def write_log(self, res):
-        results = res if isinstance(res, list) or isinstance(res, set) else [str(res)]
+        results = res if isinstance(res, (list, set)) else [str(res)]
         dt = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
         out_dir = self.__out_path / str(self.__class__)
         out_dir.mkdir(exist_ok=True, parents=True)
