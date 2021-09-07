@@ -40,7 +40,7 @@ class Handler(Base):
                     code = int(str(e)[:3])
                 except:
                     break
-                if code == 331 or code == 332:
+                if code in {331, 332}:
                     break  # anon login only
                 if code == 421:
                     break
@@ -48,11 +48,10 @@ class Handler(Base):
                     # print('-', self.ip, e)
                     break
                 if code == 431:
-                    if Connector is FTP:
-                        Connector = FTP_TLS
-                        continue
-                    else:
+                    if Connector is not FTP:
                         break
+                    Connector = FTP_TLS
+                    continue
                 # print(repr(e))
                 break
             except OSError as e:
