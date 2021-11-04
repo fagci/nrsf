@@ -4,9 +4,9 @@ from random import randrange
 MAX_IPV4 = 1 << IPV4LENGTH
 
 
-def generate_ips(count=1000000, netork_range=''):
-    if netork_range:
-        for host in IPv4Network(netork_range, strict=False).hosts():
+def generate_ips(count=1000000, network_range=''):
+    if network_range:
+        for host in IPv4Network(network_range, strict=False).hosts():
             yield str(host)
         return
 
